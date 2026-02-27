@@ -1,4 +1,4 @@
-# 最小天气 Agent（Bun + TypeScript）
+# 最小 Agent：天气查询（Bun + TypeScript）
 
 ## 文件
 
