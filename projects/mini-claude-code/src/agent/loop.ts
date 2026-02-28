@@ -33,8 +33,12 @@ export async function agentLoop(
     maxSteps: 50, // ReAct 最大轮次，防止无限循环
 
     // 每步完成后的回调：打印执行过程
+    // 最后一步（无工具调用、finishReason=stop）不打印，由外层统一输出最终结果
     onStepFinish: ({ text, toolCalls, finishReason }) => {
-      printStep({ text, toolCalls, finishReason })
+      const isFinalStep = finishReason === "stop" && toolCalls.length === 0
+      if (!isFinalStep) {
+        printStep({ text, toolCalls, finishReason })
+      }
     },
   })
 
