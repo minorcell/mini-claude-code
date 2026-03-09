@@ -1,6 +1,14 @@
+<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/a0e63927-bf8b-4b82-8610-7ea5443c4759" />
+
+
 # Mini Claude Code
 
 > Agent 开发实战课 —— 从零构建一个 Mini Claude Code（TypeScript）
+> 
+> 视频版本：[BiliBili - Build a mini claude code](https://www.bilibili.com/video/BV1QaNAzdEY7/)
+>
+> 完整教案：[Issue #2](https://github.com/minorcell/mini-claude-code/issues/2)
+
 
 ## 收益
 
@@ -28,8 +36,6 @@
 4. **最小 Agent 实现** — 天气查询 Demo，40 行核心 Loop
 5. **Mini Claude Code 设计** — 拆解 Claude Code，引入 Vercel AI SDK
 6. **工程经验** — 上下文管理、安全防护、系统提示词架构
-
-完整教案：[Issue #2](https://github.com/minorcell/mini-claude-code/issues/2)
 
 ## 项目结构
 
