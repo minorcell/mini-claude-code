@@ -1,14 +1,12 @@
 <img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/a0e63927-bf8b-4b82-8610-7ea5443c4759" />
 
-
 # Mini Claude Code
 
 > Agent 开发实战课 —— 从零构建一个 Mini Claude Code（TypeScript）
-> 
+>
 > 视频版本：[BiliBili - Build a mini claude code](https://www.bilibili.com/video/BV1QaNAzdEY7/)
 >
 > 完整教案：[Issue #2](https://github.com/minorcell/mini-claude-code/issues/2)
-
 
 ## 收益
 
@@ -46,6 +44,14 @@ mini-claude-code/
 │   │   ├── main.ts          # 40 行 AgentLoop 核心实现
 │   │   ├── tools.ts         # 工具定义（获取时间、查询天气）
 │   │   └── prompt.md        # ReAct 格式系统提示词
+│   ├── mini-claude-code-golang/ # 教学版最小 Agent（Go 标准库）
+│   │   ├── main.go          # 模型调用 + loop
+│   │   ├── tools.go         # 文件系统工具
+│   │   └── prompt.md        # 最小提示词
+│   ├── mini-claude-code-rust/ # 教学版最小 Agent（Rust）
+│   │   ├── src/main.rs      # 模型调用 + loop
+│   │   ├── src/tools.rs     # 文件系统工具
+│   │   └── prompt.md        # 最小提示词
 │   └── mini-claude-code/    # Mini Claude Code 完整实现
 │       ├── src/             # 核心源码
 │       └── docs/            # 设计文档
@@ -62,6 +68,20 @@ bun install
 bun main.ts
 ```
 
+**运行 Go 版最小 Agent：**
+
+```bash
+cd projects/mini-claude-code-golang
+go run . "请列出当前目录，并解释这个最小 Agent 的工作流程。"
+```
+
+**运行 Rust 版最小 Agent：**
+
+```bash
+cd projects/mini-claude-code-rust
+cargo run -- "请列出当前目录，并解释这个最小 Agent 的工作流程。"
+```
+
 **运行 Mini Claude Code：**
 
 ```bash
@@ -71,6 +91,10 @@ bun src/index.ts
 ```
 
 > 需要配置 `QINIU_API_KEY` 等对应的环境变量，详见具体项目内容。
+
+> Go 版最小 Agent 只使用标准库，默认读取 `LLM_API_KEY` 或 `DEEPSEEK_API_KEY`。
+
+> Rust 版最小 Agent 为了处理 HTTPS 和 JSON，使用了少量依赖。
 
 ## Mini Claude Code 工具集
 
