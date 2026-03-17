@@ -4,7 +4,7 @@
 
 > Agent 开发实战课 —— 从零构建一个 Mini Claude Code（TypeScript）
 >
-> 视频版本：[BiliBili - Build a mini claude code](https://www.bilibili.com/video/BV1QaNAzdEY7/)
+> 视频版本：[Agent到底是什么？从原理、开发到落地的一次真实分享；2026年3月14日 - 华中科技大学](https://www.bilibili.com/video/BV1eiwRzPE4n/)
 >
 > 完整教案：[Issue #2](https://github.com/minorcell/mini-claude-code/issues/2)
 
