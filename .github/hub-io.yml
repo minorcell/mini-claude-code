@@ -1,0 +1,12 @@
+version: 1
+layout:
+  columns: 6
+  avatarSize: 72
+  cardRadius: 32
+contributors:
+  maxCount: 24
+  includeBots: false
+theme:
+  background: "#08111f"
+  stroke: "#17304f"
+  title: Contributors
