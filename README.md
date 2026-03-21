@@ -121,3 +121,13 @@ bun src/index.ts
 - [完整教案 Issue #2](https://github.com/minorcell/mini-claude-code/issues/2)
 - [Vercel AI SDK 最小用法 Issue #3](https://github.com/minorcell/mini-claude-code/issues/3)
 - [Mini Claude Code 设计文档](./projects/mini-claude-code/docs)
+
+## 贡献者
+
+<table>
+  <tbody>
+    <tr><td align="center" valign="top" width="12.5%" style="word-break: break-word; white-space: normal;"><a href="https://github.com/minorcell" title="minorcell"><img src="https://avatars.githubusercontent.com/u/120795714?v=4" width="100px;" alt="minorcell" style="border-radius: 9999px;" /></a></td><td align="center" valign="top" width="12.5%" style="word-break: break-word; white-space: normal;"><a href="https://github.com/Jambo2018" title="Jambo2018"><img src="https://avatars.githubusercontent.com/u/38650337?v=4" width="100px;" alt="Jambo2018" style="border-radius: 9999px;" /></a></td>
+    </tr>
+
+  </tbody>
+</table>
