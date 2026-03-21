@@ -1,39 +1,59 @@
 # 最小 Agent：天气查询（Bun + TypeScript）
 
-## 文件
+一个最小可运行的 Agent Loop 示例，演示：模型输出 XML 动作、调用工具、接收 observation、再产出最终回答。
+
+## 文件结构
 
 ```txt
-projects
-├── bun.lock
-├── tools.ts
-├── prompt.md
+projects/agent-loop
+├── main.ts
 ├── package.json
-├── tsconfig.json
-└── main.ts
+├── prompt.md
+├── README.md
+├── tools.ts
+└── tsconfig.json
 ```
 
-## 安装
+## 快速开始
+
+1. 安装
 
 ```bash
-cd projects
+cd projects/agent-loop
 bun install
 ```
 
-## 环境变量
+2. 环境变量（推荐 .env）
 
-由外部注入：
+```bash
+cp .env.example .env
+```
+
+将 `.env` 中的以下字段替换为真实值：
 
 - `DEEPSEEK_API_KEY`（必填）
 
-## 运行
+可选：仅当前终端临时注入
 
 ```bash
-bun run main.ts "上海现在天气如何？"
+export DEEPSEEK_API_KEY="your_api_key"
 ```
 
-不传问题会使用默认问题：`上海现在天气如何？`
+3. 启动
 
-运行时会打印每一轮：
+```bash
+bun run start
+```
+
+## 运行示例
+
+```bash
+bun run start "杭州昨天天气怎么样？"
+```
+
+不传问题时，默认：`上海现在天气如何？`
+
+## 运行输出说明
 
 - `[LLM 第N轮输出]`：模型原始输出
 - `<observation>...</observation>`：当本轮有工具调用时，紧跟在 `<action>` 后输出工具返回结果

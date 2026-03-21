@@ -3,6 +3,9 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "start": "bun run main.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
