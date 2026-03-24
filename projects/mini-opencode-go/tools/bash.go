@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/provider"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/provider"
 )
 
 // BashTool 提供工作区内的 shell 命令执行能力。

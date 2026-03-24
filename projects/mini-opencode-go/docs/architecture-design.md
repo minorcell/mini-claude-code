@@ -1,4 +1,4 @@
-# mini-claude-code 架构设计文档
+# mini-opencode 架构设计文档
 
 ## 1. 模块划分
 
@@ -55,7 +55,7 @@ type ProviderConfig struct {
 **内部实现：**
 - 系统提示词从 `config/prompt.md` 通过 `//go:embed` 编译时嵌入，不暴露给用户配置
 - `provider.type` 支持别名自动规范化（如 `compatible` → `openai-compatible`）
-- 首次运行时，`Load()` 自动在 `~/.mini-claude-code/` 创建目录并写入默认 `config.yaml`
+- 首次运行时，`Load()` 自动在 `~/.mini-opencode/` 创建目录并写入默认 `config.yaml`
 
 ---
 

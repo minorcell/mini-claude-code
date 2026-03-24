@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/provider"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/provider"
 )
 
 // State 描述一次工具执行时的上下文状态。

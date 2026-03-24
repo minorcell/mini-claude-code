@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/provider"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/provider"
 )
 
 // GlobTool 按文件名模式匹配查找文件。

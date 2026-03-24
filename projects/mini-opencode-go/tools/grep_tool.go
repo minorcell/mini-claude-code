@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/provider"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/provider"
 )
 
 // GrepTool 在文件内容中搜索匹配的文本。

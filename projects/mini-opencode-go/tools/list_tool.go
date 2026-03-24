@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/provider"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/provider"
 )
 
 // ListTool 提供目录列表和文件信息查询能力。

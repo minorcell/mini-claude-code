@@ -1,4 +1,4 @@
-// Package main 提供 mini-claude-code 的程序入口。
+// Package main 提供 mini-opencode 的程序入口。
 package main
 
 import (
@@ -6,11 +6,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/config"
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/core"
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/provider"
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/tools"
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/tui"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/config"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/core"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/provider"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/tools"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/tui"
 )
 
 func main() {

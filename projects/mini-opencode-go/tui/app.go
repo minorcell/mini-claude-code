@@ -6,7 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/core"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/core"
 )
 
 // App 聚合启动 TUI 所需的运行时依赖和展示信息。

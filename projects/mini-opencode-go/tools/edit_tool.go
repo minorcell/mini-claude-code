@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/provider"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/provider"
 )
 
 // EditTool 提供文件内容精确编辑能力。

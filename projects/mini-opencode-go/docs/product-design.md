@@ -1,8 +1,8 @@
-# mini-claude-code 产品设计文档
+# mini-opencode 产品设计文档
 
 ## 1. 产品概述
 
-mini-claude-code 是一个基于终端的 AI 编程助手。它提供一个交互式命令行界面，用户通过自然语言与大语言模型（LLM）对话，LLM 以高级软件工程师的身份工作——读代码、写代码、执行命令、调试问题，所有操作在工作区内沙箱化运行。
+mini-opencode 是一个基于终端的 AI 编程助手。它提供一个交互式命令行界面，用户通过自然语言与大语言模型（LLM）对话，LLM 以高级软件工程师的身份工作——读代码、写代码、执行命令、调试问题，所有操作在工作区内沙箱化运行。
 
 ## 2. 目标用户
 
@@ -49,7 +49,7 @@ LLM 可以通过 HTTP GET 获取网页内容：
 
 - 自动剥离 HTML 标签，提取纯文本
 - 内容限制：64KB
-- User-Agent：`mini-claude-code/0.1`
+- User-Agent：`mini-opencode/0.1`
 
 ### 3.5 多 LLM 提供商支持
 
@@ -68,7 +68,7 @@ LLM 可以通过 HTTP GET 获取网页内容：
 
 ```
 +-------------------------------------------------------------------+
-| MINI CLAUDE CODE                       [WORKING]                  |
+| MINI OPENCODE                       [WORKING]                  |
 | provider OpenAI   type openai   model gpt-4.1-mini                |
 | workspace /path/to/project                                         |
 | steps 03/24 [===========-----]   focus trace                      |
@@ -76,7 +76,7 @@ LLM 可以通过 HTTP GET 获取网页内容：
 | [Conversation]                              | [Live Trace]        |
 | 用户 / assistant / 工具摘要                  | step / tool / 结果   |
 +---------------------------------------------+---------------------+
-| [Composer] > Ask mini-claude-code...                              |
+| [Composer] > Ask mini-opencode...                              |
 +-------------------------------------------------------------------+
 | status / config / help                                            |
 +-------------------------------------------------------------------+
@@ -107,7 +107,7 @@ LLM 可以通过 HTTP GET 获取网页内容：
 
 ### 6.1 配置文件
 
-配置文件位于 `~/.mini-claude-code/config.yaml`。首次启动时自动创建目录并写入默认配置。
+配置文件位于 `~/.mini-opencode/config.yaml`。首次启动时自动创建目录并写入默认配置。
 
 ### 6.2 配置项
 

@@ -25,7 +25,7 @@ func SystemPrompt() string {
 	return promptContent
 }
 
-// Config 描述 mini-claude-code 的运行配置。
+// Config 描述 mini-opencode 的运行配置。
 type Config struct {
 	Provider    ProviderConfig `yaml:"provider"`
 	MaxTokens   int            `yaml:"max_tokens"`
@@ -68,7 +68,7 @@ func DefaultPath() (string, error) {
 		return "", fmt.Errorf("resolve home directory: %w", err)
 	}
 
-	return filepath.Join(home, ".mini-claude-code", "config.yaml"), nil
+	return filepath.Join(home, ".mini-opencode", "config.yaml"), nil
 }
 
 // Load 从指定路径加载配置；当文件不存在时会回退到默认配置。

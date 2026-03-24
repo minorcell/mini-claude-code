@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/core"
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/provider"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/core"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/provider"
 )
 
 func TestHandleProgressUpdatesUsagePerStep(t *testing.T) {

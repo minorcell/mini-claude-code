@@ -22,7 +22,7 @@ func (m model) renderHeader() string {
 
 	titleLine := lipgloss.JoinHorizontal(
 		lipgloss.Center,
-		m.theme.title.Render("MINI CLAUDE CODE"),
+		m.theme.title.Render("MINI OPENCODE"),
 		space+space,
 		m.renderStatusBadge(),
 	)

@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/provider"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/provider"
 )
 
 // ReadTool 提供文件读取能力，支持按行号范围读取。

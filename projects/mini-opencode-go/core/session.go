@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/provider"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/provider"
 )
 
 // Session 表示一次对话会话及其消息历史。

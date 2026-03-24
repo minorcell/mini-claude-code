@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/provider"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/provider"
 )
 
 // TodoTool 维护当前任务的待办列表，适合复杂任务的分步推进。

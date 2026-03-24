@@ -1,4 +1,4 @@
-module github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library
+module github.com/minorcell/mini-claude-code/projects/mini-opencode-go
 
 go 1.24.0
 

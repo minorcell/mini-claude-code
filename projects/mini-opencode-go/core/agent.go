@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/provider"
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/tools"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/provider"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/tools"
 )
 
 // AgentConfig 定义 agent 运行时使用的核心参数。

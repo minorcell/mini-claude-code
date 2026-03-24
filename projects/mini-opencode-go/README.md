@@ -1,10 +1,10 @@
-# mini-claude-code
+# mini-opencode
 
-一个最小可运行的 Go 版 `mini-claude-code`，按职责拆分为：
+一个最小可运行的 Go 版 `mini-opencode`，按职责拆分为：
 
 - `core`：agent loop、session、消息流转
 - `provider`：统一模型接口，适配 OpenAI / Anthropic / Gemini
-- `config`：`~/.mini-claude-code/config.yaml` 配置管理
+- `config`：`~/.mini-opencode/config.yaml` 配置管理
 - `tui`：基于 Bubble Tea 的终端界面
 - `tools`：内置工具系统、注册中心、拦截器、工作区约束
 
@@ -18,12 +18,12 @@
 ## 运行
 
 ```bash
-go run ./cmd/mini-claude-code
+go run ./cmd/mini-opencode
 ```
 
 ## 配置
 
-默认读取 `~/.mini-claude-code/config.yaml`。`provider.name` 是用户自定义的接入名称，`provider.type` 才代表底层 API 协议格式；`url` 可以是官方地址，也可以是兼容网关。
+默认读取 `~/.mini-opencode/config.yaml`。`provider.name` 是用户自定义的接入名称，`provider.type` 才代表底层 API 协议格式；`url` 可以是官方地址，也可以是兼容网关。
 
 示例：
 

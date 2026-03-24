@@ -16,8 +16,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/core"
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/provider"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/core"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/provider"
 )
 
 type pane int
@@ -143,7 +143,7 @@ func newModel(app App) model {
 	keys := newKeyMap()
 
 	input := textarea.New()
-	input.Placeholder = "Ask mini-claude-code to inspect, edit, or debug..."
+	input.Placeholder = "Ask mini-opencode to inspect, edit, or debug..."
 	input.Prompt = ">> "
 	input.ShowLineNumbers = false
 	input.CharLimit = 4096

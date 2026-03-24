@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/minorcell/mini-claude-code/projects/mini-claude-code-go-whit-library/provider"
+	"github.com/minorcell/mini-claude-code/projects/mini-opencode-go/provider"
 )
 
 // Registry 管理工具注册、工具定义导出与统一执行流程。
