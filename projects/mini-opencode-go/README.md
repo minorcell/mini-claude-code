@@ -1,31 +1,51 @@
 # mini-opencode
 
-一个最小可运行的 Go 版 `mini-opencode`，按职责拆分为：
+`mini-opencode` 是当前仓库主推的 Code Agent project。它是一个基于 Go + Bubble Tea 的终端编程助手：读取工作区代码、调用工具、执行 shell、维护 todo，并把完整过程保留在同一个 TUI 会话里。
 
-- `core`：agent loop、session、消息流转
-- `provider`：统一模型接口，适配 OpenAI / Anthropic / Gemini
-- `config`：`~/.mini-opencode/config.yaml` 配置管理
-- `tui`：基于 Bubble Tea 的终端界面
-- `tools`：内置工具系统、注册中心、拦截器、工作区约束
+## 当前实现包含什么
 
-当前 TUI 采用多面板布局：
+- `core`：agent loop、session、逐步事件广播
+- `provider`：统一模型接口，适配 `openai` / `openai-compatible` / `anthropic` / `gemini`
+- `config`：`~/.mini-opencode/config.yaml` 配置加载与默认值
+- `tools`：工具注册中心、工作区约束、安全拦截器、内置工具
+- `tui`：Bubble Tea 交互界面
 
-- 左侧 `Conversation`：保留用户与 assistant 的完整叙事
-- 右侧 `Live Trace`：逐步展示 step、assistant 摘要与工具执行轨迹
-- 顶部状态区：显示 provider、workspace、pane 焦点与 step 进度
-- 底部输入区：Enter 发送，Tab 切 pane，`j/k` 滚动当前 pane
+当前界面不是旧文档里的 `Live Trace` 布局，而是这三个区域：
 
-## 运行
+- `Conversation`：完整展示 user / assistant / tool 的叙事和结果
+- `Context`：展示当前状态、token 统计、step 进度、todo 侧栏
+- `Composer`：输入区，支持排队下一条消息和 `@文件` 候选补全
+
+## 快速开始
 
 ```bash
+cd projects/mini-opencode-go
 go run ./cmd/mini-opencode
+```
+
+首次启动会自动生成 `~/.mini-opencode/config.yaml`。
+
+如果使用默认 OpenAI 配置，先设置：
+
+```bash
+export OPENAI_API_KEY="your_api_key"
+```
+
+跑测试：
+
+```bash
+go test ./...
 ```
 
 ## 配置
 
-默认读取 `~/.mini-opencode/config.yaml`。`provider.name` 是用户自定义的接入名称，`provider.type` 才代表底层 API 协议格式；`url` 可以是官方地址，也可以是兼容网关。
+默认配置文件路径：
 
-示例：
+```txt
+~/.mini-opencode/config.yaml
+```
+
+最小示例：
 
 ```yaml
 workspace: ~/code/my-project
@@ -34,17 +54,6 @@ max_steps: 24
 temperature: 0.2
 
 provider:
-  name: DeepSeek
-  type: openai-compatible
-  url: https://api.deepseek.com/v1
-  env_api_key: DEEPSEEK_API_KEY
-  model_id: deepseek-chat
-```
-
-官方 OpenAI 也可以这样写：
-
-```yaml
-provider:
   name: OpenAI
   type: openai
   url: https://api.openai.com/v1
@@ -52,22 +61,73 @@ provider:
   model_id: gpt-4.1-mini
 ```
 
-`type` 当前支持：
+使用 DeepSeek 这类 OpenAI-compatible 网关时：
+
+```yaml
+provider:
+  name: DeepSeek
+  type: openai-compatible
+  url: https://api.deepseek.com/v1
+  env_api_key: DEEPSEEK_API_KEY
+  model_id: deepseek-chat
+```
+
+`provider.type` 当前支持：
 
 - `openai`
 - `openai-compatible`
 - `anthropic`
 - `gemini`
 
-其中：
+默认值规则：
 
-- `openai-compatible` 适合 DeepSeek、MiniMax 等 OpenAI 兼容接口
-- `name` 可以写任意接入名，不参与协议分发
+- `openai -> url=https://api.openai.com/v1 env_api_key=OPENAI_API_KEY model_id=gpt-4.1-mini`
+- `anthropic -> url=https://api.anthropic.com/v1 env_api_key=ANTHROPIC_API_KEY model_id=claude-3-7-sonnet-latest`
+- `gemini -> url=https://generativelanguage.googleapis.com/v1beta env_api_key=GEMINI_API_KEY model_id=gemini-2.0-flash`
+- `openai-compatible -> 不预设 url / env_api_key / model_id，需要显式配置`
 
-内置默认值：
+补充说明：
 
-- `openai -> url=https://api.openai.com/v1 env_api_key=OPENAI_API_KEY`
-- `anthropic -> url=https://api.anthropic.com/v1 env_api_key=ANTHROPIC_API_KEY`
-- `gemini -> url=https://generativelanguage.googleapis.com/v1beta env_api_key=GEMINI_API_KEY`
-- `openai-compatible -> 不预设 url / env_api_key / model_id，需要用户显式配置`
-- `max_steps -> 24`
+- `provider.name` 只是界面显示名，不参与协议分发
+- `workspace` 为空时默认使用启动程序时的当前目录
+- `workspace`、`provider.url`、`provider.model_id` 支持环境变量展开
+- `provider.type` 会自动规范化别名，例如 `compatible` 会折叠成 `openai-compatible`
+
+## 内置工具
+
+| 工具 | 说明 |
+| --- | --- |
+| `read` | 读取文件，返回带行号内容，支持 `offset` / `limit` / `max_bytes` |
+| `write` | 写入文件，自动创建父目录，支持覆盖或追加 |
+| `edit` | 精确替换已有内容，默认要求 `old_content` 唯一 |
+| `list` | 列目录，支持递归和显示隐藏文件 |
+| `glob` | 按 Go 标准 glob 规则匹配文件名 |
+| `grep` | 在文件内容中搜索文本或正则，返回 `file:line: content` |
+| `bash` | 在工作区内执行 `/bin/sh -lc` 命令 |
+| `todo` | 维护当前任务 todo 列表，右侧 `Context` 会渲染状态 |
+| `webfetch` | 抓取 HTTP(S) 页面或接口，HTML 会被剥离为纯文本 |
+
+## 交互方式
+
+- `Enter`：发送消息；如果当前 turn 还在跑，会排队 1 条后续消息
+- `Ctrl+J`：在 Composer 里插入换行
+- `Esc`：如果有已排队草稿，恢复到 Composer
+- `Esc Esc`：中断当前运行中的 turn
+- `@`：在 Composer 中触发工作区文件候选
+- `Up` / `Down`：选择文件候选
+- `Tab` 或 `Enter`：接受当前文件候选
+- 鼠标滚轮：滚动 `Conversation` 记录
+- `Ctrl+C`：退出程序
+
+## 当前边界
+
+- `glob` 走的是 Go `filepath.Glob` 语义，不支持把 `**` 当成递归 doublestar
+- 右侧 `Context` 当前是状态侧栏，不是独立的逐步 trace pane；详细工具输出仍显示在 `Conversation`
+- `bash` 默认超时 20 秒，最大 2 分钟，输出上限 64KB
+- `read` 和 `webfetch` 的内容上限都是 64KB
+
+## 相关文档
+
+- [产品设计](./docs/product-design.md)
+- [架构设计](./docs/architecture-design.md)
+- [关于作者](./docs/me.md)

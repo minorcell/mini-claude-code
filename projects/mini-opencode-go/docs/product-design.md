@@ -2,156 +2,171 @@
 
 ## 1. 产品概述
 
-mini-opencode 是一个基于终端的 AI 编程助手。它提供一个交互式命令行界面，用户通过自然语言与大语言模型（LLM）对话，LLM 以高级软件工程师的身份工作——读代码、写代码、执行命令、调试问题，所有操作在工作区内沙箱化运行。
+mini-opencode 是一个运行在终端里的 Code Agent。用户用自然语言发出任务，模型在同一工作区内读文件、改文件、执行命令、维护 todo，并把每一步产物写回会话上下文。
+
+当前实现强调三点：
+
+- 终端内完成完整闭环，不依赖外部 GUI
+- 工具能力尽量贴近真实开发工作流
+- 所有操作都围绕工作区约束和最小安全防护展开
 
 ## 2. 目标用户
 
-- 需要在终端环境中快速获得 AI 编码、调试、文件操作辅助的开发者
-- 偏好命令行工作流的技术用户
-- 需要轻量级、可配置的 AI 编程助手的用户
+- 习惯在终端内工作、希望获得 AI 编码辅助的开发者
+- 需要一个轻量、可配置、可本地运行的 Code Agent 原型的用户
+- 想研究 Agent loop、工具调用和终端交互的工程实现者
 
-## 3. 核心功能
+## 3. 核心能力
 
-### 3.1 自然语言对话
+### 3.1 对话与回合执行
 
-用户在终端中输入自然语言消息，系统将消息发送给配置的 LLM，获取响应并展示在终端界面中。
+用户在 Composer 中输入消息后，系统会启动一次 turn：
 
-**交互方式：**
-- 输入消息后按 Enter 发送
-- Esc 或 Ctrl+C 退出
-- 对话过程中输入区域锁定，但仍可切换 pane 浏览对话和步骤轨迹
-- 顶部实时显示 step 进度条，右侧轨迹区逐步展示 assistant 摘要与工具状态
+1. 将用户消息写入 session
+2. 调用当前 provider
+3. 如果模型请求工具，执行工具并把结果回写给模型
+4. 直到模型不再请求工具，或达到 `max_steps`
 
-### 3.2 文件系统操作
+当前交互行为：
 
-LLM 可以通过文件系统工具对工作区内的文件进行操作：
+- `Enter` 发送消息
+- 当前 turn 运行中再次按 `Enter`，会排队 1 条后续消息
+- `Esc` 可把已排队草稿恢复回 Composer
+- `Esc Esc` 可请求中断当前 turn
+- `Ctrl+C` 退出程序
 
-| 操作 | 说明 |
-|------|------|
-| read | 读取文件内容（限制 64KB） |
-| write | 写入文件内容，支持追加模式 |
-| list | 列出目录下的文件和子目录 |
-| mkdir | 创建目录 |
-| stat | 获取文件或目录的元信息 |
+### 3.2 工作区文件工具
+
+mini-opencode 当前内置的文件相关工具如下：
+
+| 工具 | 能力 | 说明 |
+| --- | --- | --- |
+| `read` | 读取文件 | 返回带行号内容，支持 `offset` / `limit` / `max_bytes` |
+| `write` | 写入文件 | 自动创建父目录，支持覆盖与追加 |
+| `edit` | 精确修改 | 用 `old_content -> new_content` 做定点替换 |
+| `list` | 列目录 | 支持递归和显示隐藏文件 |
+| `glob` | 名称匹配 | 基于 Go 标准 glob 规则匹配路径 |
+| `grep` | 内容搜索 | 支持普通文本或正则搜索，返回 `file:line: content` |
+
+这里不再是旧文档里的 `mkdir` / `stat` 接口；当前实现已经演进为更贴近代码编辑场景的 `edit`、`glob`、`grep` 组合。
 
 ### 3.3 Shell 命令执行
 
-LLM 可以执行 Shell 命令（通过 `/bin/sh -lc`）：
+`bash` 工具通过 `/bin/sh -lc` 在工作区内执行命令，主要约束如下：
 
-- 默认超时时间：20 秒
-- 最大超时时间：2 分钟
-- 输出限制：64KB
-- 安全机制：内置危险命令拦截器，阻止 `rm -rf /`、`mkfs`、`shutdown`、`reboot`、`poweroff`、fork bomb 等命令
+- 默认超时 20 秒
+- 最大超时 2 分钟
+- 输出上限 64KB
+- 支持 `working_dir`
+- 对明显危险的命令片段做拦截，例如 `rm -rf /`、`mkfs`、`shutdown`
 
-### 3.4 网页获取
+### 3.4 Todo 与过程状态
 
-LLM 可以通过 HTTP GET 获取网页内容：
+`todo` 工具维护当前任务的完整 todo 列表，而不是只追加单项。右侧 `Context` 侧栏会把 todo 状态渲染出来，帮助用户看到当前任务分解情况。
 
-- 自动剥离 HTML 标签，提取纯文本
-- 内容限制：64KB
-- User-Agent：`mini-opencode/0.1`
+约束：
 
-### 3.5 多 LLM 提供商支持
+- 每次更新都应替换整张列表
+- 最多允许 1 个 `in_progress`
+- 任务结束时可以传空数组清空
 
-系统支持多种 LLM 提供商，用户可通过配置文件切换：
+### 3.5 网页抓取
 
-| 提供商 | 默认模型 | 说明 |
-|--------|----------|------|
-| OpenAI | gpt-4.1-mini | 官方 OpenAI API |
-| OpenAI Compatible | gpt-4.1-mini | 兼容 OpenAI API 的第三方服务 |
-| Anthropic | claude-3-7-sonnet-latest | Anthropic Claude API |
-| Gemini | gemini-2.0-flash | Google Gemini API |
+`webfetch` 支持抓取 HTTP(S) 页面或接口：
 
-## 4. 用户界面
+- 只允许 `http` / `https`
+- HTML 会被做最小清洗，剥离脚本、样式和标签
+- 内容上限 64KB
+- User-Agent 为 `mini-opencode/0.1`
 
-### 4.1 终端布局
+### 3.6 多 Provider 支持
 
+系统支持多种模型后端，按统一接口接入：
+
+| 提供商类型 | 默认模型 | 说明 |
+| --- | --- | --- |
+| `openai` | `gpt-4.1-mini` | 官方 OpenAI API |
+| `openai-compatible` | 无默认值 | DeepSeek、MiniMax 等兼容网关 |
+| `anthropic` | `claude-3-7-sonnet-latest` | Anthropic Claude API |
+| `gemini` | `gemini-2.0-flash` | Google Gemini API |
+
+## 4. 终端界面
+
+### 4.1 布局
+
+当前界面由三个主要区域组成：
+
+- 左侧 `Conversation`
+  展示 user / assistant / tool 的完整记录
+- 右侧 `Context`
+  展示 token 统计、step 进度、状态文案和 todo 列表
+- 底部 `Composer`
+  输入新消息、排队下一条消息、触发 `@文件` 候选
+
+当终端宽度较小时，`Context` 会堆叠到 `Conversation` 下方，而不是维持固定双栏。
+
+### 4.2 交互细节
+
+- `Conversation` 是主滚动区域，鼠标滚轮会滚动这里
+- `Context` 当前是被动信息侧栏，不是独立的 trace 操作面板
+- 在 Composer 中输入 `@` 会触发文件候选搜索
+- 文件候选来自工作区索引，默认跳过 `.git`、`node_modules`、`vendor`、`dist`、`.cache` 等重目录
+- 窗口过小会直接提示最小尺寸要求：`72x18`
+
+## 5. 配置管理
+
+### 5.1 配置文件
+
+默认配置文件路径：
+
+```txt
+~/.mini-opencode/config.yaml
 ```
-+-------------------------------------------------------------------+
-| MINI OPENCODE                       [WORKING]                  |
-| provider OpenAI   type openai   model gpt-4.1-mini                |
-| workspace /path/to/project                                         |
-| steps 03/24 [===========-----]   focus trace                      |
-+---------------------------------------------+---------------------+
-| [Conversation]                              | [Live Trace]        |
-| 用户 / assistant / 工具摘要                  | step / tool / 结果   |
-+---------------------------------------------+---------------------+
-| [Composer] > Ask mini-opencode...                              |
-+-------------------------------------------------------------------+
-| status / config / help                                            |
-+-------------------------------------------------------------------+
-```
 
-### 4.2 消息颜色编码
+首次启动时，如果文件不存在，会自动创建目录并写入默认配置。
 
-| 角色 | 颜色 |
-|------|------|
-| 用户（user） | 青色（cyan） |
-| 助手（assistant） | 橙色（orange） |
-| 工具调用（tool） | 绿色（green） |
-| 系统（system） | 白色（white） |
-
-## 5. 系统提示词
-
-系统提示词定义了 AI 的角色定位和行为规范，存储在 `config/prompt.md` 中，通过 Go 的 `//go:embed` 在编译时嵌入二进制文件。系统提示词不暴露给用户配置，由代码直接控制。
-
-**角色定位：** 高级软件工程师。AI 以团队成员的身份工作——先读代码再动手，理解上下文再改代码，对结果负责。
-
-**行为准则：**
-- 先读再做，探索代码库后再下结论
-- 像真实开发者一样思考和诊断问题
-- 自信地做决策，提出方案并说明取舍
-- 直接沟通，不说废话
-
-## 6. 配置管理
-
-### 6.1 配置文件
-
-配置文件位于 `~/.mini-opencode/config.yaml`。首次启动时自动创建目录并写入默认配置。
-
-### 6.2 配置项
+### 5.2 核心配置项
 
 | 配置项 | 类型 | 默认值 | 说明 |
-|--------|------|--------|------|
-| provider.name | string | openai | 提供商显示名称 |
-| provider.type | string | openai | 提供商类型：openai / openai-compatible / anthropic / gemini |
-| provider.url | string | 依提供商而定 | API 端点地址 |
-| provider.env_api_key | string | 依提供商而定 | API Key 对应的环境变量名 |
-| provider.model_id | string | 依提供商而定 | 模型 ID |
-| max_tokens | int | 1024 | 最大生成 token 数 |
-| max_steps | int | 24 | 单轮 agent 最大循环步数 |
-| temperature | float | 0.2 | 采样温度 |
-| workspace | string | 当前目录 | 工作区路径 |
+| --- | --- | --- | --- |
+| `provider.name` | string | `openai` | 仅用于界面显示 |
+| `provider.type` | string | `openai` | 协议类型 |
+| `provider.url` | string | 依 provider 而定 | API 端点 |
+| `provider.env_api_key` | string | 依 provider 而定 | API Key 环境变量名 |
+| `provider.model_id` | string | 依 provider 而定 | 模型 ID |
+| `max_tokens` | int | `1024` | 单次模型调用的最大生成 token |
+| `max_steps` | int | `24` | 单轮 agent 最大步数 |
+| `temperature` | float | `0.2` | 采样温度 |
+| `workspace` | string | 启动时当前目录 | 工作区根目录 |
 
-### 6.3 提供商别名
+### 5.3 规范化行为
 
-`provider.type` 支持别名映射，例如 `openai_compatible`、`openaicompatible`、`compatible` 均会被规范化为 `openai-compatible`。
+- `provider.type` 支持别名折叠，例如 `compatible` 会转成 `openai-compatible`
+- `workspace` 支持 `~` 展开
+- `workspace`、`provider.url`、`provider.model_id` 支持环境变量展开
 
-## 7. 安全设计
+## 6. 安全设计
 
-### 7.1 工作区沙箱
+### 6.1 工作区约束
 
-所有文件操作和 Shell 命令均限制在配置的工作区目录内：
+所有文件路径都会经过 `SafeJoin()` 校验，防止逃逸出工作区。`bash` 的 `working_dir` 也会经过同样约束。
 
-- 文件路径通过 `SafeJoin()` 进行规范化，防止路径穿越攻击
-- Shell 命令的工作目录限制在工作区内
+### 6.2 危险命令拦截
 
-### 7.2 危险命令拦截
+Shell 安全拦截器会在执行前阻断明显危险的命令片段，例如：
 
-Shell 安全拦截器在命令执行前进行检查，拦截以下危险操作：
+- `rm -rf /`
+- `mkfs`
+- `shutdown`
+- `reboot`
+- `poweroff`
+- fork bomb `:(){:|:&};:`
 
-- `rm -rf /`：删除根目录
-- `mkfs`：格式化磁盘
-- `shutdown` / `reboot` / `poweroff`：关机或重启
-- Fork bomb（`:(){ :|:& };:`）：耗尽系统资源
+## 7. 当前边界
 
-## 8. 约束与限制
-
-| 项目 | 限制 |
-|------|------|
-| 文件读取大小 | 64KB |
-| Shell 命令输出 | 64KB |
-| 网页内容大小 | 64KB |
-| Shell 命令默认超时 | 20 秒 |
-| Shell 命令最大超时 | 2 分钟 |
-| 工具调用循环最大步数 | 默认 24 步，可通过 `max_steps` 调整 |
+| 项目 | 当前行为 |
+| --- | --- |
+| `glob` 语义 | 使用 Go `filepath.Glob`，不把 `**` 视为递归 doublestar |
+| `Context` 面板 | 当前主要展示状态和 todo，不单独渲染逐步 trace 列表 |
+| `grep` 输出 | 返回匹配行，不展开上下文块 |
+| 内容上限 | `read` / `bash` / `webfetch` 默认都有限长保护 |

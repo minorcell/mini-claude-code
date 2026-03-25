@@ -2,68 +2,89 @@
 
 ## 1. 模块划分
 
-系统由 6 个模块组成，职责清晰、接口明确：
+当前项目按 6 个模块组织：
 
+```txt
+cmd/          启动编排与依赖组装
+config/       配置加载、默认值、系统提示词
+provider/     统一 LLM 接口与多厂商适配器
+core/         agent loop、session、turn 结果与进度事件
+tools/        工具注册中心、内置工具、安全拦截
+tui/          Bubble Tea 终端界面
 ```
-cmd/          入口与启动编排
-config/       配置加载与系统提示词
-provider/     LLM 适配层（统一接口，多厂商实现）
-core/         智能体循环与会话管理
-tools/        工具系统与安全拦截
-tui/          终端用户界面
+
+启动路径如下：
+
+```txt
+config.Load
+  -> config.EffectiveWorkspace
+  -> buildClient
+  -> tools.DefaultRegistry
+  -> core.NewAgent
+  -> core.NewSession
+  -> tui.Run
 ```
 
-依赖方向：`cmd → tui → core → provider + tools → config`，无循环依赖。
+## 2. config 模块
 
-## 2. 模块职责与接口
+### 2.1 职责
 
-### 2.1 config — 配置管理
+- 加载 `~/.mini-opencode/config.yaml`
+- 在配置不存在时自动写入默认文件
+- 规范化 `provider.type`
+- 解析工作区与环境变量
+- 通过 `//go:embed` 提供内置系统提示词
 
-**职责：** 加载 YAML 配置、提供默认值、字段规范化。同时通过 `//go:embed` 提供内置系统提示词。
-
-**对外暴露的类型：**
+### 2.2 核心类型
 
 ```go
 type Config struct {
-    Provider    ProviderConfig
-    MaxTokens   int
-    Temperature float64
-    Workspace   string
+    Provider    ProviderConfig `yaml:"provider"`
+    MaxTokens   int            `yaml:"max_tokens"`
+    MaxSteps    int            `yaml:"max_steps"`
+    Temperature float64        `yaml:"temperature"`
+    Workspace   string         `yaml:"workspace"`
 }
 
 type ProviderConfig struct {
-    Name      string
-    Type      string   // "openai" | "openai-compatible" | "anthropic" | "gemini"
-    URL       string
-    EnvAPIKey string
-    ModelID   string
+    Name      string `yaml:"name"`
+    Type      string `yaml:"type"`
+    URL       string `yaml:"url"`
+    EnvAPIKey string `yaml:"env_api_key"`
+    ModelID   string `yaml:"model_id"`
 }
 ```
 
-**对外暴露的方法：**
+### 2.3 关键接口
 
-| 方法 | 返回值 | 说明 |
-|------|--------|------|
-| `Default()` | `Config` | 返回可直接启动的默认配置 |
-| `Load(path)` | `(Config, error)` | 从文件加载配置；文件不存在时自动创建目录并写入默认配置 |
-| `SystemPrompt()` | `string` | 返回内置的系统提示词（从嵌入的 prompt.md） |
-| `EffectiveModel()` | `string` | 返回生效的模型 ID |
-| `EffectiveProviderType()` | `string` | 返回规范化后的提供商类型 |
-| `ProviderAPIKey()` | `string` | 从环境变量读取 API Key |
-| `EffectiveWorkspace(cwd)` | `(string, error)` | 返回工作区绝对路径 |
+| 方法 | 说明 |
+| --- | --- |
+| `Default()` | 返回默认配置 |
+| `DefaultPath()` | 返回默认配置文件路径 |
+| `Load(path)` | 读取配置，不存在时自动初始化 |
+| `SystemPrompt()` | 返回嵌入的系统提示词 |
+| `EffectiveModel()` | 返回生效模型 ID |
+| `EffectiveProviderType()` | 返回规范化后的 provider 类型 |
+| `ProviderAPIKey()` | 按 `env_api_key` 读取真实 API Key |
+| `EffectiveWorkspace(cwd)` | 解析最终工作区绝对路径 |
 
-**内部实现：**
-- 系统提示词从 `config/prompt.md` 通过 `//go:embed` 编译时嵌入，不暴露给用户配置
-- `provider.type` 支持别名自动规范化（如 `compatible` → `openai-compatible`）
-- 首次运行时，`Load()` 自动在 `~/.mini-opencode/` 创建目录并写入默认 `config.yaml`
+### 2.4 默认值
 
----
+- `openai -> gpt-4.1-mini`
+- `anthropic -> claude-3-7-sonnet-latest`
+- `gemini -> gemini-2.0-flash`
+- `openai-compatible -> 不提供默认 url / env_api_key / model_id`
+- `max_tokens -> 1024`
+- `max_steps -> 24`
+- `temperature -> 0.2`
 
-### 2.2 provider — LLM 适配层
+## 3. provider 模块
 
-**职责：** 定义统一的 LLM 调用接口，屏蔽不同厂商 API 的差异。
+### 3.1 职责
 
-**核心接口：**
+`provider` 定义统一请求/响应结构，并分别适配 OpenAI、Anthropic、Gemini 三种协议。
+
+### 3.2 统一接口
 
 ```go
 type Client interface {
@@ -72,27 +93,27 @@ type Client interface {
 }
 ```
 
-**统一数据模型：**
+### 3.3 统一数据模型
 
 ```go
 type Message struct {
-    Role       Role        // "system" | "user" | "assistant" | "tool"
-    Content    string
-    ToolCalls  []ToolCall
-    ToolCallID string
-    Name       string
+    Role       Role       `json:"role"`
+    Content    string     `json:"content,omitempty"`
+    ToolCalls  []ToolCall `json:"tool_calls,omitempty"`
+    ToolCallID string     `json:"tool_call_id,omitempty"`
+    Name       string     `json:"name,omitempty"`
 }
 
 type ToolCall struct {
-    ID        string
-    Name      string
-    Arguments json.RawMessage
+    ID        string          `json:"id"`
+    Name      string          `json:"name"`
+    Arguments json.RawMessage `json:"arguments"`
 }
 
 type ToolDefinition struct {
-    Name        string
-    Description string
-    InputSchema map[string]any
+    Name        string         `json:"name"`
+    Description string         `json:"description"`
+    InputSchema map[string]any `json:"input_schema"`
 }
 
 type Request struct {
@@ -110,25 +131,27 @@ type Response struct {
 }
 ```
 
-**实现：**
+### 3.4 实现文件
 
-| 文件 | 客户端 | 说明 |
-|------|--------|------|
-| `openai.go` | `OpenAIClient` | OpenAI 及兼容 API |
-| `anthropic.go` | `AnthropicClient` | Anthropic Claude |
-| `gemini.go` | `GeminiClient` | Google Gemini |
+| 文件 | 作用 |
+| --- | --- |
+| `openai.go` | OpenAI 与 OpenAI-compatible |
+| `anthropic.go` | Anthropic Claude |
+| `gemini.go` | Gemini |
+| `http.go` | 共享 HTTP POST 与错误处理 |
 
-每个客户端在 `Complete()` 内部完成：统一格式 → 原生格式 → HTTP 请求 → 原生响应 → 统一格式的转换。
+当前没有引入外部 LLM SDK，全部 provider 调用都是手写 HTTP 客户端。
 
-**共享 HTTP 基础设施（`http.go`）：** 提供 `postJSON()` 辅助函数，封装 HTTP POST 请求、错误处理和响应解析。
+## 4. tools 模块
 
----
+### 4.1 核心职责
 
-### 2.3 tools — 工具系统
+- 导出模型可见的工具定义
+- 执行工具调用
+- 在工具执行前后串联拦截器
+- 把结果统一渲染成 JSON 文本回写给模型
 
-**职责：** 提供可扩展的工具执行框架，支持拦截器管道进行安全检查。
-
-**核心接口：**
+### 4.2 核心接口
 
 ```go
 type Tool interface {
@@ -142,9 +165,12 @@ type Interceptor interface {
 }
 ```
 
-**核心数据类型：**
-
 ```go
+type State struct {
+    WorkingDir string
+    SessionID  string
+}
+
 type Invocation struct {
     ToolName   string
     CallID     string
@@ -162,63 +188,73 @@ type Result struct {
 }
 ```
 
-**Registry（工具注册表）：**
+### 4.3 Registry
 
 ```go
 type Registry struct { ... }
 
-func (r *Registry) Register(tool Tool)
-func (r *Registry) RegisterInterceptor(interceptor Interceptor)
-func (r *Registry) Execute(ctx context.Context, invocation Invocation) (Result, error)
+func NewRegistry(interceptors ...Interceptor) *Registry
+func (r *Registry) Register(tool Tool) error
+func (r *Registry) MustRegister(tool Tool)
 func (r *Registry) Definitions() []provider.ToolDefinition
+func (r *Registry) Execute(ctx context.Context, call provider.ToolCall, state State) (Result, error)
 ```
 
-`Execute()` 执行管道：
+`Execute()` 的顺序：
 
-```
-拦截器 Before()（按注册顺序）
-  → Tool.Execute()
-  → 拦截器 After()（按注册逆序）
-  → 返回 Result
-```
+1. 解析 `provider.ToolCall`
+2. 执行所有 `Before()`
+3. 执行目标工具
+4. 逆序执行所有 `After()`
+5. 返回 `Result`
 
-**内置工具：**
+### 4.4 当前默认工具
 
-| 工具 | 方法 | 说明 |
-|------|------|------|
-| FileSystemTool | read, write, list, mkdir, stat | 文件系统操作，read 限制 64KB |
-| BashTool | execute | Shell 命令执行，默认超时 20s，最大 2min，输出 64KB |
-| WebFetchTool | fetch | HTTP GET + HTML 标签剥离，内容 64KB |
+`tools.DefaultRegistry()` 当前注册以下工具：
 
-**内置拦截器：**
+| 工具名 | 文件 | 说明 |
+| --- | --- | --- |
+| `bash` | `bash.go` | `/bin/sh -lc` 执行命令 |
+| `read` | `read_tool.go` | 读取文件并返回带行号内容 |
+| `write` | `write_tool.go` | 覆盖或追加写入文件 |
+| `edit` | `edit_tool.go` | 精确替换旧内容 |
+| `list` | `list_tool.go` | 列目录，可递归 |
+| `glob` | `glob_tool.go` | 基于 Go 标准 glob 匹配路径 |
+| `grep` | `grep_tool.go` | 搜索文件内容 |
+| `todo` | `todo_tool.go` | 维护完整 todo 列表 |
+| `webfetch` | `webfetch.go` | 抓取网页或接口 |
 
-| 拦截器 | 检查时机 | 说明 |
-|--------|----------|------|
-| WorkspaceInterceptor | Before | 确保所有路径在工作区内（通过 `SafeJoin()`） |
-| ShellSafetyInterceptor | Before | 拦截危险命令（rm -rf /、mkfs、shutdown 等） |
+### 4.5 当前默认拦截器
 
----
+| 拦截器 | 说明 |
+| --- | --- |
+| `WorkspaceInterceptor` | 校验 `bash.working_dir` 不逃逸工作区 |
+| `ShellSafetyInterceptor` | 拦截明显危险的 shell 命令片段 |
 
-### 2.4 core — 智能体与会话
+补充说明：
 
-**职责：** 编排 LLM 调用和工具执行的循环，管理对话历史。
+- 文件工具本身也会使用 `SafeJoin()` 校验路径
+- `Result.Render()` 会把工具结果序列化成 JSON，作为 tool message 回写给模型
 
-**核心类型：**
+## 5. core 模块
+
+### 5.1 职责
+
+- 维护单轮 turn 的执行闭环
+- 管理会话消息历史
+- 汇总事件和 token 使用量
+- 向 TUI 发出逐步执行事件
+
+### 5.2 核心类型
 
 ```go
 type AgentConfig struct {
     Model       string
     MaxTokens   int
     Temperature float64
-    MaxSteps    int       // 最大工具循环步数，默认 24
+    MaxSteps    int
     WorkingDir  string
 }
-
-type Agent struct { ... }
-
-func New(client provider.Client, registry *tools.Registry, cfg AgentConfig) *Agent
-func (a *Agent) RunTurn(ctx context.Context, session *Session, userMessage string) (TurnResult, error)
-func (a *Agent) RunTurnWithObserver(ctx context.Context, session *Session, userMessage string, observer TurnObserver) (TurnResult, error)
 
 type TurnResult struct {
     Events []Event
@@ -226,169 +262,128 @@ type TurnResult struct {
     Steps  int
 }
 
-type Event struct {
-    Kind       EventKind  // "assistant" | "tool"
-    Content    string
-    ToolName   string
-    ToolInput  string
-    ToolOutput string
-    IsError    bool
-}
-
 type Session struct {
     ID        string
     StartedAt time.Time
     Messages  []provider.Message
 }
-
-func NewSession(systemPrompt string) *Session
 ```
 
-**Agent.RunTurn() 循环逻辑：**
-
-```
-1. 将用户消息添加到 Session.Messages
-2. 循环（最多 MaxSteps 步）：
-   a. 调用 provider.Client.Complete(session.Messages, toolDefinitions)
-   b. 将 assistant 消息添加到 Session.Messages
-   c. 如果 StopReason == "end_turn" → 返回
-   d. 对每个 ToolCall：
-      - 构造 Invocation，调用 registry.Execute()
-      - 将 tool 结果消息添加到 Session.Messages
-      - 记录 Event
-3. 耗尽 MaxSteps → 返回错误
-```
-
-**增量事件流：**
-- `step_started`：进入新一步
-- `assistant_message`：收到可展示的 assistant 文本
-- `tool_started`：即将执行工具
-- `tool_finished`：工具执行完成并回写简略结果
-
-**模块间依赖：** Agent 依赖 `provider.Client` 接口和 `tools.Registry`，不依赖任何具体实现。
-
----
-
-### 2.5 tui — 终端界面
-
-**职责：** 提供交互式终端界面，连接用户输入与 Agent 执行。
-
-**核心类型：**
+### 5.3 Progress 事件
 
 ```go
-type App struct { ... }
-
-func Run(systemPrompt string, client provider.Client, registry *tools.Registry, cfg config.Config) error
+const (
+    ProgressEventStepStarted
+    ProgressEventStepCompleted
+    ProgressEventAssistantMessage
+    ProgressEventToolStarted
+    ProgressEventToolFinished
+)
 ```
 
-**内部结构（Bubble Tea 架构）：**
+这些事件通过 `TurnObserver` 推给上层 UI，用于实时刷新状态。
+
+### 5.4 turn 循环
+
+当前 `Agent.runTurn()` 的逻辑是：
+
+1. 把用户消息追加到 `Session.Messages`
+2. 在 `max_steps` 范围内循环
+3. 调用 `provider.Client.Complete()`
+4. 记录 usage、assistant 消息和进度事件
+5. 如果响应里没有 `ToolCalls`，turn 结束
+6. 如果有工具调用，逐个执行 `registry.Execute()`
+7. 把工具结果作为 `provider.RoleTool` 消息回写到 session
+8. 超出 `max_steps` 时返回错误
+
+注意：当前 turn 是否继续，实际由“本轮是否返回工具调用”决定；`StopReason` 会保留在统一响应里，但主循环当前不单独依赖它做分支。
+
+## 6. tui 模块
+
+### 6.1 职责
+
+- 提供终端交互界面
+- 管理 Composer、Conversation、Context 三个区域
+- 把 `core` 的进度事件渲染成用户可见状态
+- 支持排队消息、恢复草稿、文件候选补全
+
+### 6.2 启动接口
+
+```go
+type App struct {
+    Agent        *core.Agent
+    Session      *core.Session
+    ConfigPath   string
+    ProviderName string
+    ProviderType string
+    ModelName    string
+    MaxSteps     int
+    Workspace    string
+}
+
+func Run(app App) error
+```
+
+`Run()` 会以 Alt Screen + mouse cell motion 模式启动 Bubble Tea 程序。
+
+### 6.3 主要组件
 
 ```go
 type model struct {
-    input      textinput.Model
-    transcript viewport.Model     // 左侧对话面板
-    activity   viewport.Model     // 右侧步骤轨迹面板
+    input      textarea.Model
+    transcript viewport.Model
+    activity   viewport.Model
     spinner    spinner.Model
     progress   progress.Model
     help       help.Model
-    entries    []transcriptEntry
-    trace      []activityItem
-    busy       bool
+
+    queuedPrompt string
+    filePicker   filePickerState
+    todoItems    []todoSidebarItem
     // ...
 }
 ```
 
-**消息类型：**
-- `turnProgressMsg`：逐步透传 core 的增量事件
-- `turnFinishedMsg`：Agent 回合完成时发送，携带 `core.TurnResult`
+关键点：
 
-**行为：**
-- Enter → 在后台 goroutine 执行 `agent.RunTurnWithObserver()`
-- TUI 通过 channel 连续接收 step / tool / assistant 事件，并实时刷新双 viewport
-- Agent 执行期间锁定输入，但用户仍可切换 pane 并滚动查看上下文
-- `turnFinishedMsg` 到达后：更新最终状态、解锁输入、保留完整轨迹
+- 输入组件是 `textarea.Model`，不是单行 `textinput`
+- `transcript` 对应 `Conversation`
+- `activity` 当前渲染的是 `Context` 侧栏，不是旧设计中的独立 trace viewport
+- `filePickerState` 支持在 Composer 中输入 `@` 后做文件候选补全
+- `queuedPrompt` 允许在当前运行中排队 1 条下一条消息
 
----
+### 6.4 交互行为
 
-### 2.6 cmd — 入口编排
+- `Enter` 发送；运行中再按 `Enter` 则排队消息
+- `Ctrl+J` 插入换行
+- `Esc` 恢复已排队草稿
+- `Esc Esc` 中断当前 turn
+- `@` 打开文件候选
+- 鼠标滚轮滚动对话记录
+- 终端宽度小于 `120` 时，`Context` 会堆叠到 `Conversation` 下方
 
-**职责：** 解析配置、组装依赖、启动应用。
+## 7. cmd 模块
 
-`main.go` 中的 `run()` 函数是唯一的组装点：
+`cmd/mini-opencode/main.go` 负责唯一的组装入口：
 
-```
-1. config.Load() → 加载配置（不存在则自动初始化）
-2. config.EffectiveWorkspace() → 解析工作区
-3. buildClient(cfg) → 根据 provider.type 创建 Client
-4. tools.DefaultRegistry(workspace) → 创建工具注册表
-5. core.NewAgent(client, registry, agentCfg) → 创建 Agent
-6. core.NewSession(config.SystemPrompt()) → 创建会话（系统提示词从嵌入文件获取）
-7. tui.Run(app) → 启动 UI
-```
+1. `config.DefaultPath()`
+2. `config.Load()`
+3. `cfg.EffectiveWorkspace(cwd)`
+4. `buildClient(cfg)`
+5. `tools.DefaultRegistry(workspace)`
+6. `core.NewAgent(...)`
+7. `core.NewSession(config.SystemPrompt())`
+8. `tui.Run(app)`
 
-`buildClient()` 是一个 switch，根据配置类型实例化对应的 `provider.Client` 实现。
+`buildClient()` 根据 `provider.type` 分发到：
 
-## 3. 模块间接口总览
+- `provider.NewOpenAIClient`
+- `provider.NewAnthropicClient`
+- `provider.NewGeminiClient`
 
-```
-                    config.Config
-                         │
-          ┌──────────────┼──────────────┐
-          ▼              ▼              ▼
-    config.SystemPrompt  │    config.ProviderConfig
-          │              │              │
-          │         ┌────┴────┐         │
-          │         ▼         ▼         │
-          │    provider.Client  tools.Registry
-          │    .Complete()      .Execute()
-          │         │               │
-          └─────────┴───────┬───────┘
-                            ▼
-                      core.Agent
-                      .RunTurn()
-                            │
-                            ▼
-                        tui.Run()
-```
+## 8. 当前实现边界
 
-**关键接口契约：**
-
-| 上游模块 | 下游接口 | 数据流向 |
-|----------|----------|----------|
-| `tui` | `core.Agent.RunTurn()` | 用户消息 → TurnResult |
-| `core` | `provider.Client.Complete()` | Request → Response |
-| `core` | `tools.Registry.Execute()` | Invocation → Result |
-| `cmd` | `config.SystemPrompt()` | 获取内置系统提示词 |
-| `tui` / `core` | `config.Config` | 读取配置值（只读） |
-
-## 4. 技术栈
-
-| 技术 | 版本 | 用途 |
-|------|------|------|
-| Go | 1.24.0 | 主语言 |
-| Bubble Tea | v1.3.4 | 终端 UI 框架（Elm 架构） |
-| Bubbles | v0.20.0 | 预置 TUI 组件（textinput、viewport） |
-| Lip Gloss | v1.1.0 | 终端样式与布局 |
-| yaml.v3 | v3.0.1 | YAML 配置文件解析 |
-
-不使用任何外部 LLM SDK，所有提供商集成均为手写 HTTP 客户端。
-
-## 5. 可扩展性
-
-### 5.1 新增 LLM 提供商
-
-1. 在 `provider/` 下创建新文件（如 `mistral.go`）
-2. 实现 `provider.Client` 接口
-3. 在 `cmd/main.go` 的 `buildClient()` 添加 case
-4. 在 `config/config.go` 添加默认配置
-
-### 5.2 新增工具
-
-1. 在 `tools/` 下创建新文件
-2. 实现 `tools.Tool` 接口
-3. 在 `tools/defaults.go` 的 `DefaultRegistry()` 中注册
-
-### 5.3 新增拦截器
-
-1. 实现 `tools.Interceptor` 接口
-2. 在 `tools/defaults.go` 的 `DefaultRegistry()` 中注册
+- `glob` 使用 Go `filepath.Glob`，不支持把 `**` 当成递归匹配
+- `grep` 当前返回匹配行文本，`context` 参数还没有展开成上下文块输出
+- 右侧 `Context` 面板当前聚焦状态和 todo，不单独显示逐步 trace 列表
+- provider 调用当前是 request/response 式，没有 token 级 streaming
