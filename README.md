@@ -18,12 +18,12 @@
 
 ## 仓库结构
 
-| 目录 | 定位 | 说明 |
-| --- | --- | --- |
-| `projects/mini-opencode-go/` | 当前主线 | Go + Bubble Tea 版 `mini-opencode` |
-| `projects/mini-claude-code/` | TypeScript 教学版 | Bun + Vercel AI SDK 实现的 Code Agent |
-| `projects/agent-loop/` | 最小 ReAct Demo | 手写 XML 工具调用的天气查询 Agent |
-| `projects/mini-claude-code-rust/` | Rust 教学版 | 文件系统工具 + OpenAI-compatible loop |
+| 目录                              | 定位              | 说明                                  |
+| --------------------------------- | ----------------- | ------------------------------------- |
+| `projects/mini-opencode-go/`      | 当前主线          | Go + Bubble Tea 版 `mini-opencode`    |
+| `projects/mini-claude-code/`      | TypeScript 教学版 | Bun + Vercel AI SDK 实现的 Code Agent |
+| `projects/agent-loop/`            | 最小 ReAct Demo   | 手写 XML 工具调用的天气查询 Agent     |
+| `projects/mini-claude-code-rust/` | Rust 教学版       | 文件系统工具 + OpenAI-compatible loop |
 
 `projects/mini-claude-code-with-library/` 目前还是占位空目录，不算正式可运行项目。
 
