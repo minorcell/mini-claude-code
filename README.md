@@ -1,126 +1,90 @@
-<img width="1376" height="768" alt="image" src="https://github.com/user-attachments/assets/a0e63927-bf8b-4b82-8610-7ea5443c4759" />
+# mini-claude-code
 
-# Mini Claude Code
+一个围绕 Code Agent 的实验与教学仓库。仓库名还是 `mini-claude-code`，但当前主推 project 已切到 `mini-opencode`。
 
-> Agent 开发实战课 —— 从零构建一个 Mini Claude Code（TypeScript）
->
-> 视频版本：[Agent到底是什么？从原理、开发到落地的一次真实分享；2026年3月14日 - 华中科技大学](https://www.bilibili.com/video/BV1eiwRzPE4n/)
->
-> 完整教案：[Issue #2](https://github.com/minorcell/mini-claude-code/issues/2)
+## 当前主推项目
 
-## 收益
+- 项目名：`mini-opencode`
+- 文档指代：`@mini-opencode/`
+- 仓库目录：`projects/mini-opencode-go/`
 
-- 理解为什么 Agent 能"做事情"，而 ChatBot 不能
-- 听得懂 ReAct 与 Agent 基本架构
-- 能跑通最小 TypeScript Agent
-- 带走可落地的工程经验
+`mini-opencode` 是一个基于 Go + Bubble Tea 的终端 Code Agent，目前具备：
 
-## 核心概念
+- 交互式 TUI：`Conversation` / `Live Trace` / `Composer` 多面板
+- 多 provider 支持：`openai`、`openai-compatible`、`anthropic`、`gemini`
+- 内置工具：`read`、`write`、`edit`、`list`、`glob`、`grep`、`bash`、`todo`、`webfetch`
+- 工作区约束、危险命令拦截、step 追踪与会话管理
+- 默认配置文件：`~/.mini-opencode/config.yaml`
 
-**Agent = ReAct + Tools + UI**
+## 仓库结构
 
-| 概念       | 说明                                             |
-| ---------- | ------------------------------------------------ |
-| 上下文窗口 | 维护消息历史数组，作为模型的完整输入             |
-| 系统提示词 | 定义 Agent 身份、能力边界与输出规范              |
-| 工具调用   | 模型生成结构化指令，触发外部能力，结果回注上下文 |
-| ReAct 循环 | 观察 → 思考 → 行动，控制流从人转移到模型         |
+| 目录 | 定位 | 说明 |
+| --- | --- | --- |
+| `projects/mini-opencode-go/` | 当前主线 | Go + Bubble Tea 版 `mini-opencode` |
+| `projects/mini-claude-code/` | TypeScript 教学版 | Bun + Vercel AI SDK 实现的 Code Agent |
+| `projects/agent-loop/` | 最小 ReAct Demo | 手写 XML 工具调用的天气查询 Agent |
+| `projects/mini-claude-code-rust/` | Rust 教学版 | 文件系统工具 + OpenAI-compatible loop |
 
-## 教案目录
-
-1. **Agent 是怎么工作的？** — ChatBot vs Agent 的本质差异
-2. **ReAct：让模型"边想边做"** — 循环架构与控制流转移
-3. **Agent 最小架构** — `ReAct + Tools + UI` 公式拆解
-4. **最小 Agent 实现** — 天气查询 Demo，40 行核心 Loop
-5. **Mini Claude Code 设计** — 拆解 Claude Code，引入 Vercel AI SDK
-6. **工程经验** — 上下文管理、安全防护、系统提示词架构
-
-## 项目结构
-
-```
-mini-claude-code/
-├── projects/
-│   ├── agent-loop/          # 最小 Agent Demo：天气查询（Bun + TypeScript）
-│   │   ├── main.ts          # 40 行 AgentLoop 核心实现
-│   │   ├── tools.ts         # 工具定义（获取时间、查询天气）
-│   │   └── prompt.md        # ReAct 格式系统提示词
-│   ├── mini-claude-code-golang/ # 教学版最小 Agent（Go 标准库）
-│   │   ├── main.go          # 模型调用 + loop
-│   │   ├── tools.go         # 文件系统工具
-│   │   └── prompt.md        # 最小提示词
-│   ├── mini-claude-code-rust/ # 教学版最小 Agent（Rust）
-│   │   ├── src/main.rs      # 模型调用 + loop
-│   │   ├── src/tools.rs     # 文件系统工具
-│   │   └── prompt.md        # 最小提示词
-│   └── mini-claude-code/    # Mini Claude Code 完整实现
-│       ├── src/             # 核心源码
-│       └── docs/            # 设计文档
-└── README.md
-```
+`projects/mini-claude-code-with-library/` 目前还是占位空目录，不算正式可运行项目。
 
 ## 快速开始
 
-**运行最小 Agent Demo（天气查询）：**
+### 运行当前主推项目：mini-opencode
+
+```bash
+cd projects/mini-opencode-go
+go run ./cmd/mini-opencode
+```
+
+首次启动会自动生成 `~/.mini-opencode/config.yaml`。默认 provider 是 OpenAI，需要设置 `OPENAI_API_KEY`。如果改用 `openai-compatible`、`anthropic` 或 `gemini`，请在配置文件里同步填写对应的 `url`、`env_api_key` 和 `model_id`。
+
+### 运行其他教学项目
+
+**agent-loop**
 
 ```bash
 cd projects/agent-loop
 bun install
-bun main.ts
+cp .env.example .env
+bun run start
 ```
 
-**运行 Go 版最小 Agent：**
+需要 `DEEPSEEK_API_KEY`。
+
+**mini-claude-code**
 
 ```bash
-cd projects/mini-claude-code-golang
-go run . "请列出当前目录，并解释这个最小 Agent 的工作流程。"
+cd projects/mini-claude-code
+bun install
+cp .env.example .env
+bun start
 ```
 
-**运行 Rust 版最小 Agent：**
+需要 `QINIU_API_KEY`。
+
+**mini-claude-code-rust**
 
 ```bash
 cd projects/mini-claude-code-rust
 cargo run -- "请列出当前目录，并解释这个最小 Agent 的工作流程。"
 ```
 
-**运行 Mini Claude Code：**
+需要 `LLM_API_KEY` 或 `DEEPSEEK_API_KEY`。
 
-```bash
-cd projects/mini-claude-code
-bun install
-bun src/index.ts
-```
+## 建议阅读顺序
 
-> 需要配置 `QINIU_API_KEY` 等对应的环境变量，详见具体项目内容。
+1. `projects/agent-loop/`：先看最小 ReAct Loop，理解工具调用和 observation 回注。
+2. `projects/mini-claude-code/`：再看 TypeScript 工程版，理解 SDK 化后的实现方式。
+3. `projects/mini-opencode-go/`：最后看当前主推项目，关注 TUI、配置系统和工具注册表。
 
-> Go 版最小 Agent 只使用标准库，默认读取 `LLM_API_KEY` 或 `DEEPSEEK_API_KEY`。
+## 相关文档
 
-> Rust 版最小 Agent 为了处理 HTTPS 和 JSON，使用了少量依赖。
-
-## Mini Claude Code 工具集
-
-精简到 4 个核心工具，够用不乱：
-
-| 工具         | 说明            |
-| ------------ | --------------- |
-| Read         | 读取文件内容    |
-| Write / Edit | 写入与修改文件  |
-| Bash         | 执行 Shell 命令 |
-| WebFetch     | 网络请求        |
-
-> 工具别贪多。每多一个，模型负担就加重。
-
-## 技术栈
-
-- **Runtime**：[Bun](https://bun.sh/)
-- **Language**：TypeScript
-- **AI SDK**：[Vercel AI SDK](https://ai-sdk.dev/)
-- **模型服务**：兼容 OpenAI 协议的任意服务（演示使用七牛大模型推理）
-
-## 相关链接
-
-- [完整教案 Issue #2](https://github.com/minorcell/mini-claude-code/issues/2)
-- [Vercel AI SDK 最小用法 Issue #3](https://github.com/minorcell/mini-claude-code/issues/3)
+- [mini-opencode README](./projects/mini-opencode-go/README.md)
+- [mini-opencode 产品设计](./projects/mini-opencode-go/docs/product-design.md)
+- [mini-opencode 架构设计](./projects/mini-opencode-go/docs/architecture-design.md)
 - [Mini Claude Code 设计文档](./projects/mini-claude-code/docs)
+- [Agent 到底是什么？从原理、开发到落地的一次真实分享；2026 年 3 月 14 日 - 华中科技大学](https://www.bilibili.com/video/BV1eiwRzPE4n/)
+- [完整教案 Issue #2](https://github.com/minorcell/mini-claude-code/issues/2)
 
 ## 贡献者
 
