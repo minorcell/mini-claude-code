@@ -109,8 +109,7 @@ func (t uiTheme) panelFrame(focused bool, accent string) lipgloss.Style {
 	if focused {
 		borderColor = accent
 	}
-	return t.panelBase.Copy().
-		BorderForeground(lipgloss.Color(borderColor))
+	return t.panelBase.BorderForeground(lipgloss.Color(borderColor))
 }
 
 func (t uiTheme) panelFill() lipgloss.Style {

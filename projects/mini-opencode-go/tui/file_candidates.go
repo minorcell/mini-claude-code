@@ -166,7 +166,7 @@ func searchFileCandidates(files []string, query string, limit int) []fileCandida
 func scoreFileCandidate(path string, query string) (fileCandidate, bool) {
 	base := strings.ToLower(filepath.Base(path))
 	full := strings.ToLower(path)
-	score := 900
+	var score int
 
 	switch {
 	case query == "":

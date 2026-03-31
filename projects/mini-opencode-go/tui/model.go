@@ -42,13 +42,6 @@ type todoSidebarItem struct {
 
 type activityStatus string
 
-const (
-	activityInfo    activityStatus = "info"
-	activityRunning activityStatus = "running"
-	activityDone    activityStatus = "done"
-	activityError   activityStatus = "error"
-)
-
 type activityItem struct {
 	ID      string
 	Step    int

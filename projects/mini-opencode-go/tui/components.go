@@ -15,59 +15,6 @@ type renderedToolResult struct {
 	Metadata map[string]any `json:"metadata"`
 }
 
-func (m model) renderHeader() string {
-	innerWidth := max(1, m.layout.totalWidth-m.panelBorderWidth())
-	innerHeight := max(0, m.layout.headerHeight-m.panelBorderHeight())
-	space := m.theme.panelFill().Render(" ")
-
-	titleLine := lipgloss.JoinHorizontal(
-		lipgloss.Center,
-		m.theme.title.Render("MINI OPENCODE"),
-		space+space,
-		m.renderStatusBadge(),
-	)
-
-	metaLine := lipgloss.JoinHorizontal(
-		lipgloss.Center,
-		m.theme.badge("provider "+previewText(m.provider, 18), m.theme.teal, m.theme.ink),
-		space,
-		m.theme.badge("type "+previewText(m.providerTy, 18), m.theme.sage, m.theme.ink),
-		space,
-		m.theme.badge("model "+previewText(m.modelName, 28), m.theme.gold, m.theme.ink),
-	)
-
-	workspaceLine := lipgloss.JoinHorizontal(
-		lipgloss.Left,
-		m.theme.metaKey.Render("workspace "),
-		m.theme.metaValue.Render(truncateMiddle(m.workspace, m.layout.totalWidth-12)),
-	)
-
-	progressLabel := m.theme.metaKey.Render(fmt.Sprintf("steps %02d/%02d ", m.stepCount, m.maxSteps))
-	progressLine := lipgloss.JoinHorizontal(
-		lipgloss.Center,
-		progressLabel,
-		m.progress.View(),
-		space+space,
-		m.theme.metaValue.Render("focus "+m.activePaneLabel()),
-	)
-
-	body := m.theme.panelFill().
-		Width(innerWidth).
-		Height(innerHeight).
-		Render(lipgloss.JoinVertical(
-			lipgloss.Left,
-			titleLine,
-			metaLine,
-			workspaceLine,
-			progressLine,
-		))
-
-	return m.theme.panelFrame(true, m.theme.teal).
-		Width(innerWidth).
-		Height(innerHeight).
-		Render(body)
-}
-
 func (m model) renderMain() string {
 	columnGap := m.theme.canvasFill().Render(" ")
 	rowGap := m.theme.canvasFill().Width(m.layout.totalWidth).Render("")
@@ -162,7 +109,7 @@ func (m model) renderPanel(title string, hint string, body string, width int, he
 		lipgloss.Center,
 		titleBadge,
 		space,
-		m.theme.panelMeta.Copy().Width(hintWidth).Align(lipgloss.Right).Render(hint),
+		m.theme.panelMeta.Width(hintWidth).Align(lipgloss.Right).Render(hint),
 	)
 
 	content := m.theme.panelFill().
@@ -201,64 +148,23 @@ func (m model) renderTranscriptEntry(entry transcriptEntry, width int) string {
 		lipgloss.Center,
 		m.theme.badge(entry.Title, accent, m.theme.ink),
 		m.theme.panelFill().Render(" "),
-		m.theme.entryMeta.Copy().Width(metaWidth).Align(lipgloss.Right).Render(entry.Meta),
+		m.theme.entryMeta.Width(metaWidth).Align(lipgloss.Right).Render(entry.Meta),
 	)
 
-	body := m.theme.entryText.Copy().Width(width).Render(entry.Body)
+	body := m.theme.entryText.Width(width).Render(entry.Body)
 	card := m.theme.panelFill().
 		MarginBottom(1)
 	if entry.Role == "system" {
-		body = m.theme.dim.Copy().Width(width).Render(entry.Body)
+		body = m.theme.dim.Width(width).Render(entry.Body)
 	}
 	if entry.Role == "tool" {
-		body = m.theme.traceResult.Copy().Width(width).Render(entry.Body)
+		body = m.theme.traceResult.Width(width).Render(entry.Body)
 	}
 	if entry.Role == "user" || entry.Role == "assistant" {
-		body = m.theme.entryText.Copy().Width(width).Render(entry.Body)
+		body = m.theme.entryText.Width(width).Render(entry.Body)
 	}
 
 	return card.Width(width).Render(lipgloss.JoinVertical(lipgloss.Left, header, body))
-}
-
-func (m model) renderTraceItem(item activityItem, width int) string {
-	statusBadge := m.renderTraceStatus(item.Status)
-	stepBadge := m.theme.badge(fmt.Sprintf("%02d", item.Step), m.theme.sand, m.theme.ink)
-	titleWidth := max(0, width-lipgloss.Width(stepBadge)-lipgloss.Width(statusBadge)-2)
-	header := lipgloss.JoinHorizontal(
-		lipgloss.Center,
-		stepBadge,
-		m.theme.panelFill().Render(" "),
-		m.theme.traceText.Copy().Width(titleWidth).Render(strings.ToUpper(item.Title)),
-		m.theme.panelFill().Render(" "),
-		statusBadge,
-	)
-
-	lines := []string{
-		header,
-		m.theme.traceText.Copy().Width(width).Render(item.Summary),
-	}
-	if item.Detail != "" {
-		lines = append(lines, m.theme.traceDetail.Copy().Width(width).Render(item.Detail))
-	}
-	if item.Result != "" {
-		lines = append(lines, m.theme.traceResult.Copy().Width(width).Render(item.Result))
-	}
-
-	borderColor := m.theme.ash
-	if item.Status == activityRunning {
-		borderColor = m.theme.gold
-	}
-	if item.Status == activityError {
-		borderColor = m.theme.coral
-	}
-
-	return m.theme.panelFill().
-		BorderStyle(lipgloss.Border{Left: "|"}).
-		BorderForeground(lipgloss.Color(borderColor)).
-		PaddingLeft(1).
-		MarginBottom(1).
-		Width(width).
-		Render(lipgloss.JoinVertical(lipgloss.Left, lines...))
 }
 
 func (m model) renderOverviewBody(width int) string {
@@ -271,8 +177,8 @@ func (m model) renderOverviewBody(width int) string {
 
 	contextLines := []string{
 		m.theme.badge("CONTEXT", m.theme.sand, m.theme.ink),
-		m.theme.entryText.Copy().Bold(true).Width(width).Render(fmt.Sprintf("%s tokens", formatCount(sessionUsageTotal))),
-		m.theme.traceText.Copy().Width(width).Render(previewText(m.status, max(20, width))),
+		m.theme.entryText.Bold(true).Width(width).Render(fmt.Sprintf("%s tokens", formatCount(sessionUsageTotal))),
+		m.theme.traceText.Width(width).Render(previewText(m.status, max(20, width))),
 		m.renderSidebarRows(width, []metricRow{
 			{Label: "turn", Value: formatCount(turnUsageTotal)},
 			{Label: "input", Value: formatCount(m.currentTurnUsage.InputTokens)},
@@ -283,7 +189,7 @@ func (m model) renderOverviewBody(width int) string {
 		}),
 	}
 	if m.lastAction != "" {
-		contextLines = append(contextLines, m.theme.dim.Copy().Width(width).Render(previewText(m.lastAction, 96)))
+		contextLines = append(contextLines, m.theme.dim.Width(width).Render(previewText(m.lastAction, 96)))
 	}
 
 	blocks := []string{
@@ -301,37 +207,14 @@ type metricRow struct {
 	Value string
 }
 
-func (m model) renderOverviewSection(width int, title string, rows []metricRow) string {
-	lines := []string{
-		m.theme.badge(strings.ToUpper(title), m.theme.sand, m.theme.ink),
-	}
-	for _, row := range rows {
-		labelWidth := clamp(width/2, 8, 12)
-		line := lipgloss.JoinHorizontal(
-			lipgloss.Top,
-			m.theme.traceDetail.Copy().Width(labelWidth).Render(strings.ToUpper(row.Label)),
-			m.theme.traceText.Copy().Width(max(1, width-labelWidth)).Align(lipgloss.Right).Render(row.Value),
-		)
-		lines = append(lines, line)
-	}
-
-	return m.theme.panelFill().
-		BorderStyle(lipgloss.Border{Left: "|"}).
-		BorderForeground(lipgloss.Color(m.theme.teal)).
-		PaddingLeft(1).
-		MarginBottom(1).
-		Width(width).
-		Render(lipgloss.JoinVertical(lipgloss.Left, lines...))
-}
-
 func (m model) renderSidebarRows(width int, rows []metricRow) string {
 	lines := make([]string, 0, len(rows))
 	for _, row := range rows {
 		labelWidth := clamp(width/2, 8, 12)
 		line := lipgloss.JoinHorizontal(
 			lipgloss.Top,
-			m.theme.traceDetail.Copy().Width(labelWidth).Render(strings.ToUpper(row.Label)),
-			m.theme.traceText.Copy().Width(max(1, width-labelWidth)).Align(lipgloss.Right).Render(row.Value),
+			m.theme.traceDetail.Width(labelWidth).Render(strings.ToUpper(row.Label)),
+			m.theme.traceText.Width(max(1, width-labelWidth)).Align(lipgloss.Right).Render(row.Value),
 		)
 		lines = append(lines, line)
 	}
@@ -347,7 +230,7 @@ func (m model) renderTodoSection(width int) string {
 		lines = append(lines, lipgloss.JoinHorizontal(
 			lipgloss.Top,
 			m.theme.traceText.Render(todoStatusIcon(item.Status)+" "),
-			m.theme.entryText.Copy().Width(max(8, width-4)).Render(previewText(item.Content, max(12, width-4))),
+			m.theme.entryText.Width(max(8, width-4)).Render(previewText(item.Content, max(12, width-4))),
 		))
 	}
 
@@ -377,15 +260,15 @@ func (m model) renderFileCandidateList(width int) string {
 		dirStyle := m.theme.traceDetail
 		if i == m.filePicker.Selected {
 			prefix = "> "
-			baseStyle = baseStyle.Copy().Bold(true)
-			dirStyle = dirStyle.Copy().Foreground(lipgloss.Color(m.theme.gold))
+			baseStyle = baseStyle.Bold(true)
+			dirStyle = dirStyle.Foreground(lipgloss.Color(m.theme.gold))
 		}
 
 		baseWidth := width - 4
 		if candidate.Dir != "" {
 			baseWidth = max(8, width-lipgloss.Width(candidate.Dir)-7)
 		}
-		line := prefix + baseStyle.Copy().Width(baseWidth).Render(candidate.Base)
+		line := prefix + baseStyle.Width(baseWidth).Render(candidate.Base)
 		if candidate.Dir != "" {
 			line += m.theme.panelFill().Render(" ") + dirStyle.Render(candidate.Dir)
 		}
@@ -405,7 +288,7 @@ func (m model) renderQueuedPrompt(width int) string {
 
 	lines := []string{
 		m.theme.panelMeta.Render("queued next message"),
-		m.theme.entryText.Copy().Width(width).Render(preview),
+		m.theme.entryText.Width(width).Render(preview),
 	}
 
 	return m.theme.panelFill().
@@ -424,13 +307,6 @@ func (m model) footerHint() string {
 	}
 }
 
-func formatQueued(prompt string) string {
-	if strings.TrimSpace(prompt) == "" {
-		return "0 / 1"
-	}
-	return "1 / 1"
-}
-
 func todoStatusIcon(status string) string {
 	switch status {
 	case "completed":
@@ -439,45 +315,6 @@ func todoStatusIcon(status string) string {
 		return "[•]"
 	default:
 		return "[ ]"
-	}
-}
-
-func (m model) renderStatusBadge() string {
-	label := "READY"
-	background := m.theme.sage
-	foreground := m.theme.ink
-	if m.busy {
-		label = m.spinner.View() + " WORKING"
-		background = m.theme.gold
-	}
-	if m.lastErr != nil {
-		label = "ERROR"
-		background = m.theme.coral
-	}
-	return m.theme.badge(label, background, foreground)
-}
-
-func (m model) renderTraceStatus(status activityStatus) string {
-	switch status {
-	case activityRunning:
-		return m.theme.badge("running", m.theme.gold, m.theme.ink)
-	case activityDone:
-		return m.theme.badge("done", m.theme.sage, m.theme.ink)
-	case activityError:
-		return m.theme.badge("error", m.theme.coral, m.theme.cream)
-	default:
-		return m.theme.badge("info", m.theme.sand, m.theme.ink)
-	}
-}
-
-func (m model) activePaneLabel() string {
-	switch m.activePane {
-	case paneConversation:
-		return "conversation"
-	case paneTrace:
-		return "trace"
-	default:
-		return "composer"
 	}
 }
 
