@@ -7,3 +7,5 @@ dist/
 /projects/mini-claude-code-golang/main
 /projects/mini-claude-code-golang/mini-claude-code-golang
 /projects/mini-claude-code-rust/target/
+
+.cache/
