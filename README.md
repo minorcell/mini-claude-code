@@ -1,5 +1,11 @@
 # mini-claude-code
 
+> 本仓库是一个面向 Agent 开发初学者的教学项目仓库，早期使用 TypeScript + AI SDK 实现，现在切换为 Golang + Openai ADK + BubbleTea 实现。
+>
+> Bilibili 视频教学：[Agent 到底是什么？从原理、开发到落地的一次真实分享；2026 年 3 月 14 日 - 华中科技大学](https://www.bilibili.com/video/BV1eiwRzPE4n/)
+>
+> Issue 风格教案：[完整教案 Issue #2](https://github.com/minorcell/mini-claude-code/issues/2)
+
 `mini-opencode` 是一个 Code Agent 项目。它基于 Go + Bubble Tea，提供终端内的代码读取、工具调用、shell 执行与 todo 管理能力，并将过程保留在同一个 TUI 会话里。
 
 ## 仓库结构
@@ -129,11 +135,3 @@ provider:
 - 右侧 `Context` 用于展示 token、step、todo 等状态信息；详细工具输出显示在 `Conversation`
 - `bash` 默认超时 20 秒，最大 2 分钟，输出上限 64KB
 - `read` 和 `webfetch` 的内容上限都是 64KB
-
-## 相关文档
-
-- [产品设计](./docs/product-design.md)
-- [架构设计](./docs/architecture-design.md)
-- [Mini Claude Code 设计文档](./examples/mini-claude-code/docs)
-- [Agent 到底是什么？从原理、开发到落地的一次真实分享；2026 年 3 月 14 日 - 华中科技大学](https://www.bilibili.com/video/BV1eiwRzPE4n/)
-- [完整教案 Issue #2](https://github.com/minorcell/mini-claude-code/issues/2)
