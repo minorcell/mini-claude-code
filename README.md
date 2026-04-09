@@ -135,3 +135,6 @@ provider:
 - 右侧 `Context` 用于展示 token、step、todo 等状态信息；详细工具输出显示在 `Conversation`
 - `bash` 默认超时 20 秒，最大 2 分钟，输出上限 64KB
 - `read` 和 `webfetch` 的内容上限都是 64KB
+
+## Contributors
+![](https://hub-io-mcells-projects.vercel.app/r/minorcell/mini-claude-code)
