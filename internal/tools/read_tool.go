@@ -125,7 +125,7 @@ func (t *ReadTool) readLines(target string, offset, limit, maxBytes int) (Result
 		}
 
 		if limit > 0 && len(lines) >= limit {
-			continue
+			break
 		}
 
 		lines = append(lines, fmt.Sprintf("%6d\t%s", totalLines, line))
