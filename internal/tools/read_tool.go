@@ -111,21 +111,21 @@ func (t *ReadTool) readLines(target string, offset, limit, maxBytes int) (Result
 	bytesRead := 0
 
 	for scanner.Scan() {
-		totalLines++
-		line := scanner.Text()
-		bytesRead += len(line) + 1
-
-		if bytesRead > maxBytes {
-			truncated = true
+		if limit > 0 && len(lines) >= limit {
 			break
 		}
+
+		totalLines++
+		line := scanner.Text()
 
 		if offset > 0 && totalLines < offset {
 			continue
 		}
 
-		if limit > 0 && len(lines) >= limit {
-			continue
+		bytesRead += len(line) + 1
+		if bytesRead > maxBytes {
+			truncated = true
+			break
 		}
 
 		lines = append(lines, fmt.Sprintf("%6d\t%s", totalLines, line))

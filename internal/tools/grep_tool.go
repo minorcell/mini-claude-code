@@ -143,7 +143,10 @@ func (t *GrepTool) grep(dir, pattern, fileGlob string, isRegex, ignoreCase bool,
 			}
 		}
 
-		matches := t.searchFile(path, pattern, re, ignoreCase, dir, contextLines)
+		matches, searchErr := t.searchFile(path, pattern, re, ignoreCase, dir, contextLines)
+		if searchErr != nil {
+			return searchErr
+		}
 		for _, m := range matches {
 			if matchCount >= maxResults {
 				break
@@ -174,38 +177,73 @@ func (t *GrepTool) grep(dir, pattern, fileGlob string, isRegex, ignoreCase bool,
 	}, nil
 }
 
-func (t *GrepTool) searchFile(filePath, pattern string, re *regexp.Regexp, ignoreCase bool, baseDir string, contextLines int) []string {
+func (t *GrepTool) searchFile(filePath, pattern string, re *regexp.Regexp, ignoreCase bool, baseDir string, contextLines int) ([]string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		return nil
+		return nil, nil
 	}
 	defer file.Close()
 
-	var lines []string
+	var fileLines []string
 	scanner := bufio.NewScanner(file)
-	lineNum := 0
 
 	for scanner.Scan() {
-		lineNum++
-		line := scanner.Text()
+		fileLines = append(fileLines, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("scan file %q: %w", filePath, err)
+	}
 
-		var matched bool
-		if re != nil {
-			matched = re.MatchString(line)
-		} else if ignoreCase {
-			matched = strings.Contains(strings.ToLower(line), strings.ToLower(pattern))
-		} else {
-			matched = strings.Contains(line, pattern)
+	relPath, err := filepath.Rel(baseDir, filePath)
+	if err != nil {
+		relPath = filePath
+	}
+
+	var lines []string
+	if contextLines <= 0 {
+		for i, line := range fileLines {
+			if lineMatched(line, pattern, re, ignoreCase) {
+				lines = append(lines, fmt.Sprintf("%s:%d: %s", relPath, i+1, line))
+			}
+		}
+		return lines, nil
+	}
+
+	selectedLineNumbers := make(map[int]struct{})
+	for i, line := range fileLines {
+		if !lineMatched(line, pattern, re, ignoreCase) {
+			continue
 		}
 
-		if matched {
-			relPath, err := filepath.Rel(baseDir, filePath)
-			if err != nil {
-				relPath = filePath
-			}
-			lines = append(lines, fmt.Sprintf("%s:%d: %s", relPath, lineNum, line))
+		start := i - contextLines
+		if start < 0 {
+			start = 0
+		}
+		end := i + contextLines
+		if end >= len(fileLines) {
+			end = len(fileLines) - 1
+		}
+		for j := start; j <= end; j++ {
+			selectedLineNumbers[j] = struct{}{}
 		}
 	}
 
-	return lines
+	for i, line := range fileLines {
+		if _, ok := selectedLineNumbers[i]; !ok {
+			continue
+		}
+		lines = append(lines, fmt.Sprintf("%s:%d: %s", relPath, i+1, line))
+	}
+
+	return lines, nil
+}
+
+func lineMatched(line, pattern string, re *regexp.Regexp, ignoreCase bool) bool {
+	if re != nil {
+		return re.MatchString(line)
+	}
+	if ignoreCase {
+		return strings.Contains(strings.ToLower(line), strings.ToLower(pattern))
+	}
+	return strings.Contains(line, pattern)
 }
