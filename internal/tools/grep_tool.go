@@ -103,10 +103,10 @@ func (t *GrepTool) Execute(_ context.Context, invocation Invocation) (Result, er
 		maxResults = 50
 	}
 
-	return t.grep(target, args.Pattern, args.Glob, args.Regex, args.IgnoreCase, maxResults, args.Context)
+	return t.grep(target, args.Pattern, args.Glob, args.Regex, args.IgnoreCase, maxResults)
 }
 
-func (t *GrepTool) grep(dir, pattern, fileGlob string, isRegex, ignoreCase bool, maxResults, contextLines int) (Result, error) {
+func (t *GrepTool) grep(dir, pattern, fileGlob string, isRegex, ignoreCase bool, maxResults int) (Result, error) {
 	var re *regexp.Regexp
 	var err error
 
@@ -143,7 +143,7 @@ func (t *GrepTool) grep(dir, pattern, fileGlob string, isRegex, ignoreCase bool,
 			}
 		}
 
-		matches := t.searchFile(path, pattern, re, ignoreCase, dir, contextLines)
+		matches := t.searchFile(path, pattern, re, ignoreCase, dir)
 		for _, m := range matches {
 			if matchCount >= maxResults {
 				break
@@ -174,7 +174,7 @@ func (t *GrepTool) grep(dir, pattern, fileGlob string, isRegex, ignoreCase bool,
 	}, nil
 }
 
-func (t *GrepTool) searchFile(filePath, pattern string, re *regexp.Regexp, ignoreCase bool, baseDir string, contextLines int) []string {
+func (t *GrepTool) searchFile(filePath, pattern string, re *regexp.Regexp, ignoreCase bool, baseDir string) []string {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil
@@ -205,6 +205,10 @@ func (t *GrepTool) searchFile(filePath, pattern string, re *regexp.Regexp, ignor
 			}
 			lines = append(lines, fmt.Sprintf("%s:%d: %s", relPath, lineNum, line))
 		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil
 	}
 
 	return lines
