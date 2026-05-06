@@ -77,9 +77,7 @@ func (r *Registry) Execute(ctx context.Context, call provider.ToolCall, state St
 		SessionID:  state.SessionID,
 		Arguments:  call.Arguments,
 	}
-	if len(call.Arguments) > 0 {
-		_ = json.Unmarshal(call.Arguments, &invocation.ParsedArgs)
-	}
+	_ = json.Unmarshal(call.Arguments, &invocation.ParsedArgs)
 
 	for _, interceptor := range r.interceptors {
 		if err := interceptor.Before(ctx, &invocation); err != nil {

@@ -91,9 +91,6 @@ func SafeJoin(root string, candidate string) (string, error) {
 
 // stringArg 从已解析参数中安全读取字符串值。
 func stringArg(arguments map[string]any, key string) (string, bool) {
-	if arguments == nil {
-		return "", false
-	}
 	value, ok := arguments[key]
 	if !ok {
 		return "", false

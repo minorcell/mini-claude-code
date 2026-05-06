@@ -77,10 +77,8 @@ func (t *WriteTool) Execute(_ context.Context, invocation Invocation) (Result, e
 	}
 
 	create := true
-	if invocation.ParsedArgs != nil {
-		if v, ok := invocation.ParsedArgs["create"].(bool); ok {
-			create = v
-		}
+	if v, ok := invocation.ParsedArgs["create"].(bool); ok {
+		create = v
 	}
 
 	return t.write(target, args.Content, args.Append, create)

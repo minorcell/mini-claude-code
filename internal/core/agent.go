@@ -235,10 +235,10 @@ func stringifyArguments(arguments json.RawMessage) string {
 	}
 
 	var out bytes.Buffer
-	if err := json.Indent(&out, arguments, "", "  "); err == nil {
-		return out.String()
+	if err := json.Indent(&out, arguments, "", "  "); err != nil {
+		return string(arguments)
 	}
-	return string(arguments)
+	return out.String()
 }
 
 func emitProgress(observer TurnObserver, event ProgressEvent) {
