@@ -4,7 +4,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// renderFileCandidateList renders the file candidate list for the file picker
 func (m model) renderFileCandidateList(width int) string {
 	if m.filePicker.Loading {
 		return m.theme.dim.Render("Indexing workspace files...")

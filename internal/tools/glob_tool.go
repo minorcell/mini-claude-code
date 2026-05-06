@@ -12,7 +12,6 @@ import (
 	"github.com/minorcell/mini-claude-code/internal/provider"
 )
 
-// GlobTool 按文件名模式匹配查找文件。
 type GlobTool struct {
 	root string
 }
@@ -23,14 +22,12 @@ type globArgs struct {
 	MaxResults int    `json:"max_results,omitempty"`
 }
 
-// NewGlobTool 创建一个 glob 搜索工具实例。
 func NewGlobTool(root string) *GlobTool {
 	return &GlobTool{
 		root: root,
 	}
 }
 
-// Definition 返回 glob 工具的模型可见定义。
 func (t *GlobTool) Definition() provider.ToolDefinition {
 	return provider.ToolDefinition{
 		Name:        "glob",
@@ -56,7 +53,6 @@ func (t *GlobTool) Definition() provider.ToolDefinition {
 	}
 }
 
-// Execute 执行 glob 搜索。
 func (t *GlobTool) Execute(_ context.Context, invocation Invocation) (Result, error) {
 	var args globArgs
 	if err := json.Unmarshal(invocation.Arguments, &args); err != nil {

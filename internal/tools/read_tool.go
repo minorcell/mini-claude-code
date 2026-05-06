@@ -11,7 +11,6 @@ import (
 	"github.com/minorcell/mini-claude-code/internal/provider"
 )
 
-// ReadTool 提供文件读取能力，支持按行号范围读取。
 type ReadTool struct {
 	root         string
 	maxReadBytes int
@@ -24,7 +23,6 @@ type readArgs struct {
 	MaxBytes int    `json:"max_bytes,omitempty"`
 }
 
-// NewReadTool 创建一个文件读取工具实例。
 func NewReadTool(root string) *ReadTool {
 	return &ReadTool{
 		root:         root,
@@ -32,7 +30,6 @@ func NewReadTool(root string) *ReadTool {
 	}
 }
 
-// Definition 返回文件读取工具的模型可见定义。
 func (t *ReadTool) Definition() provider.ToolDefinition {
 	return provider.ToolDefinition{
 		Name:        "read",
@@ -62,7 +59,6 @@ func (t *ReadTool) Definition() provider.ToolDefinition {
 	}
 }
 
-// Execute 执行文件读取操作。
 func (t *ReadTool) Execute(_ context.Context, invocation Invocation) (Result, error) {
 	var args readArgs
 	if err := json.Unmarshal(invocation.Arguments, &args); err != nil {

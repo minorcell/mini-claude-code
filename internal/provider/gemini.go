@@ -7,21 +7,18 @@ import (
 	"strings"
 )
 
-// GeminiConfig 描述 Gemini 协议客户端所需的初始化参数。
 type GeminiConfig struct {
 	APIKey  string
 	BaseURL string
 	Model   string
 }
 
-// GeminiClient 实现基于 Gemini GenerateContent API 的协议适配。
 type GeminiClient struct {
 	apiKey     string
 	baseURL    string
 	defaultMod string
 }
 
-// NewGeminiClient 创建一个 Gemini 协议客户端。
 func NewGeminiClient(cfg GeminiConfig) (*GeminiClient, error) {
 	if strings.TrimSpace(cfg.APIKey) == "" {
 		return nil, fmt.Errorf("gemini api key is required")
@@ -40,12 +37,10 @@ func NewGeminiClient(cfg GeminiConfig) (*GeminiClient, error) {
 	}, nil
 }
 
-// Name 返回当前客户端的 provider 类型。
 func (c *GeminiClient) Name() string {
 	return "gemini"
 }
 
-// Complete 发起一次统一请求，并将 Gemini 响应转换为公共 Response。
 func (c *GeminiClient) Complete(ctx context.Context, req Request) (Response, error) {
 	model := strings.TrimSpace(req.Model)
 	if model == "" {

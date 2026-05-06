@@ -9,13 +9,11 @@ import (
 	"github.com/minorcell/mini-claude-code/internal/provider"
 )
 
-// Registry 管理工具注册、工具定义导出与统一执行流程。
 type Registry struct {
 	tools        map[string]Tool
 	interceptors []Interceptor
 }
 
-// NewRegistry 创建一个新的工具注册中心。
 func NewRegistry(interceptors ...Interceptor) *Registry {
 	return &Registry{
 		tools:        make(map[string]Tool),
@@ -23,7 +21,6 @@ func NewRegistry(interceptors ...Interceptor) *Registry {
 	}
 }
 
-// Register 注册一个工具；同名工具会被拒绝。
 func (r *Registry) Register(tool Tool) error {
 	definition := tool.Definition()
 	if definition.Name == "" {
@@ -36,14 +33,12 @@ func (r *Registry) Register(tool Tool) error {
 	return nil
 }
 
-// MustRegister 注册工具，失败时直接 panic，适合程序启动阶段使用。
 func (r *Registry) MustRegister(tool Tool) {
 	if err := r.Register(tool); err != nil {
 		panic(err)
 	}
 }
 
-// Definitions 返回当前所有已注册工具的定义列表。
 func (r *Registry) Definitions() []provider.ToolDefinition {
 	names := make([]string, 0, len(r.tools))
 	for name := range r.tools {
@@ -58,7 +53,6 @@ func (r *Registry) Definitions() []provider.ToolDefinition {
 	return definitions
 }
 
-// Execute 按统一流程执行一次工具调用，并串联所有拦截器。
 func (r *Registry) Execute(ctx context.Context, call provider.ToolCall, state State) (Result, error) {
 	tool, ok := r.tools[call.Name]
 	if !ok {

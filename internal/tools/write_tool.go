@@ -11,7 +11,6 @@ import (
 	"github.com/minorcell/mini-claude-code/internal/provider"
 )
 
-// WriteTool 提供文件写入能力，支持创建新文件和覆盖/追加内容。
 type WriteTool struct {
 	root string
 }
@@ -23,14 +22,12 @@ type writeArgs struct {
 	Create  bool   `json:"create,omitempty"`
 }
 
-// NewWriteTool 创建一个文件写入工具实例。
 func NewWriteTool(root string) *WriteTool {
 	return &WriteTool{
 		root: root,
 	}
 }
 
-// Definition 返回文件写入工具的模型可见定义。
 func (t *WriteTool) Definition() provider.ToolDefinition {
 	return provider.ToolDefinition{
 		Name:        "write",
@@ -60,7 +57,6 @@ func (t *WriteTool) Definition() provider.ToolDefinition {
 	}
 }
 
-// Execute 执行文件写入操作。
 func (t *WriteTool) Execute(_ context.Context, invocation Invocation) (Result, error) {
 	var args writeArgs
 	if err := json.Unmarshal(invocation.Arguments, &args); err != nil {

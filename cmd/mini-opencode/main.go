@@ -1,4 +1,3 @@
-// Package main 提供 mini-opencode 的程序入口。
 package main
 
 import (
@@ -20,7 +19,6 @@ func main() {
 	}
 }
 
-// run 负责加载配置、构建依赖并启动 TUI。
 func run() error {
 	configPath, err := config.DefaultPath()
 	if err != nil {
@@ -69,7 +67,6 @@ func run() error {
 	})
 }
 
-// buildClient 根据 provider.type 构建对应的协议客户端。
 func buildClient(cfg config.Config) (provider.Client, string, error) {
 	providerType := cfg.EffectiveProviderType()
 	modelName := cfg.EffectiveModel()

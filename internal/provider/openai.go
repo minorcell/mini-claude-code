@@ -7,21 +7,18 @@ import (
 	"strings"
 )
 
-// OpenAIConfig 描述 OpenAI 协议客户端所需的初始化参数。
 type OpenAIConfig struct {
 	APIKey  string
 	BaseURL string
 	Model   string
 }
 
-// OpenAIClient 实现基于 OpenAI Chat Completions 的协议适配。
 type OpenAIClient struct {
 	apiKey     string
 	baseURL    string
 	defaultMod string
 }
 
-// NewOpenAIClient 创建一个 OpenAI 协议客户端。
 func NewOpenAIClient(cfg OpenAIConfig) (*OpenAIClient, error) {
 	if strings.TrimSpace(cfg.APIKey) == "" {
 		return nil, fmt.Errorf("openai api key is required")
@@ -40,12 +37,10 @@ func NewOpenAIClient(cfg OpenAIConfig) (*OpenAIClient, error) {
 	}, nil
 }
 
-// Name 返回当前客户端的 provider 类型。
 func (c *OpenAIClient) Name() string {
 	return "openai"
 }
 
-// Complete 发起一次统一请求，并将 OpenAI 响应转换为公共 Response。
 func (c *OpenAIClient) Complete(ctx context.Context, req Request) (Response, error) {
 	model := strings.TrimSpace(req.Model)
 	if model == "" {

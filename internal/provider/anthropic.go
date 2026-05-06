@@ -7,21 +7,18 @@ import (
 	"strings"
 )
 
-// AnthropicConfig 描述 Anthropic 协议客户端所需的初始化参数。
 type AnthropicConfig struct {
 	APIKey  string
 	BaseURL string
 	Model   string
 }
 
-// AnthropicClient 实现基于 Anthropic Messages API 的协议适配。
 type AnthropicClient struct {
 	apiKey     string
 	baseURL    string
 	defaultMod string
 }
 
-// NewAnthropicClient 创建一个 Anthropic 协议客户端。
 func NewAnthropicClient(cfg AnthropicConfig) (*AnthropicClient, error) {
 	if strings.TrimSpace(cfg.APIKey) == "" {
 		return nil, fmt.Errorf("anthropic api key is required")
@@ -40,12 +37,10 @@ func NewAnthropicClient(cfg AnthropicConfig) (*AnthropicClient, error) {
 	}, nil
 }
 
-// Name 返回当前客户端的 provider 类型。
 func (c *AnthropicClient) Name() string {
 	return "anthropic"
 }
 
-// Complete 发起一次统一请求，并将 Anthropic 响应转换为公共 Response。
 func (c *AnthropicClient) Complete(ctx context.Context, req Request) (Response, error) {
 	model := strings.TrimSpace(req.Model)
 	if model == "" {

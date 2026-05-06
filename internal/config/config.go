@@ -1,4 +1,3 @@
-// Package config 负责加载、规范化并提供运行配置。
 package config
 
 import (
@@ -20,12 +19,10 @@ const (
 //go:embed prompt.md
 var promptContent string
 
-// SystemPrompt 返回内置的系统提示词。
 func SystemPrompt() string {
 	return promptContent
 }
 
-// Config 描述 mini-opencode 的运行配置。
 type Config struct {
 	Provider    ProviderConfig `yaml:"provider"`
 	MaxTokens   int            `yaml:"max_tokens"`
@@ -34,9 +31,6 @@ type Config struct {
 	Workspace   string         `yaml:"workspace"`
 }
 
-// ProviderConfig 描述单个模型接入点。
-//
-// Name 用于展示接入名称，Type 用于选择底层 API 协议适配器。
 type ProviderConfig struct {
 	Name      string `yaml:"name"`
 	Type      string `yaml:"type"`
@@ -45,7 +39,6 @@ type ProviderConfig struct {
 	ModelID   string `yaml:"model_id"`
 }
 
-// Default 返回可直接启动程序的默认配置。
 func Default() Config {
 	return Config{
 		Provider: ProviderConfig{
@@ -61,7 +54,6 @@ func Default() Config {
 	}
 }
 
-// DefaultPath 返回默认配置文件路径。
 func DefaultPath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -71,7 +63,6 @@ func DefaultPath() (string, error) {
 	return filepath.Join(home, ".mini-opencode", "config.yaml"), nil
 }
 
-// Load 从指定路径加载配置；当文件不存在时会回退到默认配置。
 func Load(path string) (Config, error) {
 	if strings.TrimSpace(path) == "" {
 		var err error
@@ -104,17 +95,14 @@ func Load(path string) (Config, error) {
 	return cfg, nil
 }
 
-// EffectiveModel 返回当前生效的模型 ID。
 func (c Config) EffectiveModel() string {
 	return strings.TrimSpace(c.Provider.ModelID)
 }
 
-// EffectiveProviderType 返回规范化后的 provider 类型。
 func (c Config) EffectiveProviderType() string {
 	return normalizeProviderType(c.Provider.Type)
 }
 
-// ProviderAPIKey 根据 env_api_key 指向的环境变量读取真实 API Key。
 func (c Config) ProviderAPIKey() string {
 	envName := strings.TrimSpace(c.Provider.EnvAPIKey)
 	if envName == "" {
@@ -123,7 +111,6 @@ func (c Config) ProviderAPIKey() string {
 	return strings.TrimSpace(os.Getenv(envName))
 }
 
-// EffectiveWorkspace 返回当前生效的工作区绝对路径。
 func (c Config) EffectiveWorkspace(cwd string) (string, error) {
 	workspace := strings.TrimSpace(c.Workspace)
 	if workspace == "" {
@@ -142,7 +129,6 @@ func (c Config) EffectiveWorkspace(cwd string) (string, error) {
 	return abs, nil
 }
 
-// initConfigFile 在配置文件不存在时创建目录并写入默认配置。
 func initConfigFile(path string, cfg *Config) error {
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -161,7 +147,6 @@ func initConfigFile(path string, cfg *Config) error {
 	return nil
 }
 
-// applyEnv 预留给环境变量合并逻辑扩展，目前默认配置已足够覆盖启动路径。
 func (c *Config) applyEnv() {}
 
 func (c *Config) normalize() {
@@ -211,7 +196,6 @@ func expandHome(path string) (string, error) {
 	return path, nil
 }
 
-// normalizeProviderType 将用户输入的 provider.type 统一折叠为内部标准值。
 func normalizeProviderType(value string) string {
 	normalized := strings.ToLower(strings.TrimSpace(value))
 	switch normalized {
@@ -228,7 +212,6 @@ func normalizeProviderType(value string) string {
 	}
 }
 
-// defaultProviderURL 返回不同 provider 类型的默认 API 地址。
 func defaultProviderURL(providerType string) string {
 	switch normalizeProviderType(providerType) {
 	case "anthropic":
@@ -242,7 +225,6 @@ func defaultProviderURL(providerType string) string {
 	}
 }
 
-// defaultEnvAPIKey 返回不同 provider 类型推荐使用的默认环境变量名。
 func defaultEnvAPIKey(providerType string) string {
 	switch normalizeProviderType(providerType) {
 	case "anthropic":
@@ -256,7 +238,6 @@ func defaultEnvAPIKey(providerType string) string {
 	}
 }
 
-// defaultModelID 返回不同 provider 类型的默认模型 ID。
 func defaultModelID(providerType string) string {
 	switch normalizeProviderType(providerType) {
 	case "anthropic":

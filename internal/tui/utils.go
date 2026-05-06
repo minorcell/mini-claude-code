@@ -13,7 +13,6 @@ type renderedToolResult struct {
 	Metadata map[string]any `json:"metadata"`
 }
 
-// summarizeToolCall creates a summary of a tool call for display
 func summarizeToolCall(name string, rawInput string) (string, string) {
 	args := parseJSONMap(rawInput)
 	switch name {
@@ -47,7 +46,6 @@ func summarizeToolCall(name string, rawInput string) (string, string) {
 	}
 }
 
-// summarizeToolResult creates a summary of a tool result for display
 func summarizeToolResult(name string, rawInput string, rawOutput string, isError bool) (string, string) {
 	args := parseJSONMap(rawInput)
 	result := parseRenderedToolResult(rawOutput)
@@ -110,7 +108,6 @@ func summarizeToolResult(name string, rawInput string, rawOutput string, isError
 	}
 }
 
-// parseJSONMap parses a JSON string into a map
 func parseJSONMap(raw string) map[string]any {
 	out := map[string]any{}
 	trimmed := strings.TrimSpace(raw)
@@ -121,14 +118,12 @@ func parseJSONMap(raw string) map[string]any {
 	return out
 }
 
-// parseRenderedToolResult parses a rendered tool result from JSON
 func parseRenderedToolResult(raw string) renderedToolResult {
 	result := renderedToolResult{}
 	_ = json.Unmarshal([]byte(strings.TrimSpace(raw)), &result)
 	return result
 }
 
-// previewText creates a preview of text with a limit
 func previewText(value string, limit int) string {
 	normalized := strings.Join(strings.Fields(strings.TrimSpace(value)), " ")
 	if normalized == "" {
@@ -140,7 +135,6 @@ func previewText(value string, limit int) string {
 	return normalized[:limit-3] + "..."
 }
 
-// truncateMiddle truncates text from the middle
 func truncateMiddle(value string, limit int) string {
 	if limit <= 0 || len(value) <= limit {
 		return value
@@ -153,7 +147,6 @@ func truncateMiddle(value string, limit int) string {
 	return value[:head] + "..." + value[len(value)-tail:]
 }
 
-// firstLine returns the first line of text
 func firstLine(value string) string {
 	value = strings.TrimSpace(value)
 	if value == "" {
@@ -165,7 +158,6 @@ func firstLine(value string) string {
 	return value
 }
 
-// lineCount returns the number of lines in text
 func lineCount(value string) int {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" {
@@ -174,7 +166,6 @@ func lineCount(value string) int {
 	return strings.Count(trimmed, "\n") + 1
 }
 
-// stringValue converts any value to string
 func stringValue(value any) string {
 	if value == nil {
 		return ""
@@ -187,7 +178,6 @@ func stringValue(value any) string {
 	}
 }
 
-// intValue converts any value to int
 func intValue(value any) int {
 	switch actual := value.(type) {
 	case int:
@@ -203,7 +193,6 @@ func intValue(value any) int {
 	}
 }
 
-// summarizeTodoArgs summarizes todo arguments
 func summarizeTodoArgs(args map[string]any) (count int, inProgress int, completed int) {
 	rawItems, ok := args["items"].([]any)
 	if !ok {
@@ -225,7 +214,6 @@ func summarizeTodoArgs(args map[string]any) (count int, inProgress int, complete
 	return count, inProgress, completed
 }
 
-// timeSince returns the duration since a given time
 func timeSince(start time.Time) time.Duration {
 	if start.IsZero() {
 		return 0
@@ -233,7 +221,6 @@ func timeSince(start time.Time) time.Duration {
 	return time.Since(start)
 }
 
-// formatCount formats a count with appropriate units
 func formatCount(value int) string {
 	if value <= 0 {
 		return "-"

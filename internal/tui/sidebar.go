@@ -7,13 +7,11 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// metricRow represents a row in the sidebar metrics display
 type metricRow struct {
 	Label string
 	Value string
 }
 
-// renderOverviewBody renders the overview panel with usage statistics and status
 func (m model) renderOverviewBody(width int) string {
 	turnUsageTotal := m.currentTurnUsage.InputTokens + m.currentTurnUsage.OutputTokens
 	sessionUsageTotal := m.sessionUsage.InputTokens + m.sessionUsage.OutputTokens
@@ -49,7 +47,6 @@ func (m model) renderOverviewBody(width int) string {
 	return lipgloss.JoinVertical(lipgloss.Left, blocks...)
 }
 
-// renderSidebarRows renders multiple metric rows in the sidebar
 func (m model) renderSidebarRows(width int, rows []metricRow) string {
 	lines := make([]string, 0, len(rows))
 	for _, row := range rows {
@@ -64,7 +61,6 @@ func (m model) renderSidebarRows(width int, rows []metricRow) string {
 	return lipgloss.JoinVertical(lipgloss.Left, lines...)
 }
 
-// renderTodoSection renders the todo items section
 func (m model) renderTodoSection(width int) string {
 	lines := []string{
 		m.theme.badge("TODO", m.theme.teal, m.theme.ink),
@@ -81,7 +77,6 @@ func (m model) renderTodoSection(width int) string {
 	return lipgloss.JoinVertical(lipgloss.Left, lines...)
 }
 
-// todoStatusIcon returns the appropriate icon for todo status
 func todoStatusIcon(status string) string {
 	switch status {
 	case "completed":

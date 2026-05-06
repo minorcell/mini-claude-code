@@ -13,7 +13,6 @@ import (
 	"github.com/minorcell/mini-claude-code/internal/provider"
 )
 
-// GrepTool 在文件内容中搜索匹配的文本。
 type GrepTool struct {
 	root string
 }
@@ -28,14 +27,12 @@ type grepArgs struct {
 	Context    int    `json:"context,omitempty"`
 }
 
-// NewGrepTool 创建一个 grep 搜索工具实例。
 func NewGrepTool(root string) *GrepTool {
 	return &GrepTool{
 		root: root,
 	}
 }
 
-// Definition 返回 grep 工具的模型可见定义。
 func (t *GrepTool) Definition() provider.ToolDefinition {
 	return provider.ToolDefinition{
 		Name:        "grep",
@@ -77,7 +74,6 @@ func (t *GrepTool) Definition() provider.ToolDefinition {
 	}
 }
 
-// Execute 执行 grep 搜索。
 func (t *GrepTool) Execute(_ context.Context, invocation Invocation) (Result, error) {
 	var args grepArgs
 	if err := json.Unmarshal(invocation.Arguments, &args); err != nil {
