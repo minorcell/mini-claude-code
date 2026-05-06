@@ -5,6 +5,8 @@
 > Bilibili 视频教学：[Agent 到底是什么？从原理、开发到落地的一次真实分享；2026 年 3 月 14 日 - 华中科技大学](https://www.bilibili.com/video/BV1eiwRzPE4n/)
 >
 > Issue 风格教案：[完整教案 Issue #2](https://github.com/minorcell/mini-claude-code/issues/2)
+>
+> 交互式教学：[CellStack - 从0构建一个 Mini Claude Code](https://stack.mcell.top/topics/build-mini-claude-code)
 
 `mini-opencode` 是一个 Code Agent 项目。它基于 Go + Bubble Tea，提供终端内的代码读取、工具调用、shell 执行与 todo 管理能力，并将过程保留在同一个 TUI 会话里。
 
