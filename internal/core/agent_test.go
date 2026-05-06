@@ -45,7 +45,6 @@ func (fakeTool) Execute(_ context.Context, _ tools.Invocation) (tools.Result, er
 	}, nil
 }
 
-// TestRunTurnExecutesToolLoop 验证 agent 能完成一轮工具调用闭环。
 func TestRunTurnExecutesToolLoop(t *testing.T) {
 	registry := tools.NewRegistry()
 	registry.MustRegister(fakeTool{})
@@ -115,7 +114,6 @@ func TestRunTurnExecutesToolLoop(t *testing.T) {
 	}
 }
 
-// TestRunTurnWithObserverEmitsProgress 验证增量观察者会收到逐步执行事件。
 func TestRunTurnWithObserverEmitsProgress(t *testing.T) {
 	registry := tools.NewRegistry()
 	registry.MustRegister(fakeTool{})

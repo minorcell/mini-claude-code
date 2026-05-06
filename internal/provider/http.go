@@ -11,12 +11,10 @@ import (
 	"time"
 )
 
-// defaultHTTPClient 返回 provider 统一使用的默认 HTTP 客户端。
 func defaultHTTPClient() *http.Client {
 	return &http.Client{Timeout: 90 * time.Second}
 }
 
-// postJSON 负责发送 JSON POST 请求并解析 JSON 响应。
 func postJSON(ctx context.Context, client *http.Client, url string, headers map[string]string, requestBody any, responseBody any) error {
 	payload, err := json.Marshal(requestBody)
 	if err != nil {

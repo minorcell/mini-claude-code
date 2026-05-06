@@ -10,7 +10,6 @@ import (
 	"github.com/minorcell/mini-claude-code/internal/provider"
 )
 
-// TodoTool 维护当前任务的待办列表，适合复杂任务的分步推进。
 type TodoTool struct {
 	mu    sync.Mutex
 	lists map[string][]todoItem
@@ -26,14 +25,12 @@ type todoItem struct {
 	Status  string `json:"status"`
 }
 
-// NewTodoTool 创建一个 todo 工具实例。
 func NewTodoTool() *TodoTool {
 	return &TodoTool{
 		lists: make(map[string][]todoItem),
 	}
 }
 
-// Definition 返回 todo 工具的模型可见定义。
 func (t *TodoTool) Definition() provider.ToolDefinition {
 	return provider.ToolDefinition{
 		Name:        "todo",
@@ -70,7 +67,6 @@ func (t *TodoTool) Definition() provider.ToolDefinition {
 	}
 }
 
-// Execute 执行一次 todo 工具调用。
 func (t *TodoTool) Execute(_ context.Context, invocation Invocation) (Result, error) {
 	var args todoArgs
 	if err := json.Unmarshal(invocation.Arguments, &args); err != nil {

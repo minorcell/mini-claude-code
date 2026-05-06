@@ -19,7 +19,6 @@ var (
 	spaceStripper = regexp.MustCompile(`\s+`)
 )
 
-// WebFetchTool 提供基于 HTTP(S) 的网页与接口抓取能力。
 type WebFetchTool struct {
 	client       *http.Client
 	maxBodyBytes int
@@ -29,7 +28,6 @@ type webFetchArgs struct {
 	URL string `json:"url"`
 }
 
-// NewWebFetchTool 创建一个网页抓取工具实例。
 func NewWebFetchTool() *WebFetchTool {
 	return &WebFetchTool{
 		client: &http.Client{
@@ -39,7 +37,6 @@ func NewWebFetchTool() *WebFetchTool {
 	}
 }
 
-// Definition 返回 webfetch 工具的模型可见定义。
 func (t *WebFetchTool) Definition() provider.ToolDefinition {
 	return provider.ToolDefinition{
 		Name:        "webfetch",
@@ -57,7 +54,6 @@ func (t *WebFetchTool) Definition() provider.ToolDefinition {
 	}
 }
 
-// Execute 执行一次网页抓取工具调用。
 func (t *WebFetchTool) Execute(ctx context.Context, invocation Invocation) (Result, error) {
 	var args webFetchArgs
 	if err := json.Unmarshal(invocation.Arguments, &args); err != nil {
@@ -116,7 +112,6 @@ func (t *WebFetchTool) Execute(ctx context.Context, invocation Invocation) (Resu
 	}, nil
 }
 
-// normalizeFetchedContent 对抓取结果做最小清洗，便于模型进一步消费。
 func normalizeFetchedContent(body string, contentType string) string {
 	if strings.Contains(strings.ToLower(contentType), "text/html") {
 		body = htmlStripper.ReplaceAllString(body, " ")

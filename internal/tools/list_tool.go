@@ -12,7 +12,6 @@ import (
 	"github.com/minorcell/mini-claude-code/internal/provider"
 )
 
-// ListTool 提供目录列表和文件信息查询能力。
 type ListTool struct {
 	root string
 }
@@ -23,14 +22,12 @@ type listArgs struct {
 	All     bool   `json:"all,omitempty"`
 }
 
-// NewListTool 创建一个目录列表工具实例。
 func NewListTool(root string) *ListTool {
 	return &ListTool{
 		root: root,
 	}
 }
 
-// Definition 返回目录列表工具的模型可见定义。
 func (t *ListTool) Definition() provider.ToolDefinition {
 	return provider.ToolDefinition{
 		Name:        "list",
@@ -56,7 +53,6 @@ func (t *ListTool) Definition() provider.ToolDefinition {
 	}
 }
 
-// Execute 执行目录列表操作。
 func (t *ListTool) Execute(_ context.Context, invocation Invocation) (Result, error) {
 	var args listArgs
 	if err := json.Unmarshal(invocation.Arguments, &args); err != nil {

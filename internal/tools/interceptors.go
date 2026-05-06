@@ -7,12 +7,10 @@ import (
 	"strings"
 )
 
-// WorkspaceInterceptor 用于阻止文件与命令路径逃逸出工作区。
 type WorkspaceInterceptor struct {
 	Root string
 }
 
-// Before 在执行前检查路径参数是否仍位于工作区内。
 func (i WorkspaceInterceptor) Before(_ context.Context, invocation *Invocation) error {
 	switch invocation.ToolName {
 	case "filesystem":
@@ -29,13 +27,10 @@ func (i WorkspaceInterceptor) Before(_ context.Context, invocation *Invocation) 
 	return nil
 }
 
-// After 是工作区拦截器的后置钩子，当前不做额外处理。
 func (WorkspaceInterceptor) After(_ context.Context, _ Invocation, _ *Result, _ error) {}
 
-// ShellSafetyInterceptor 用于拦截明显危险的 shell 指令片段。
 type ShellSafetyInterceptor struct{}
 
-// Before 在执行 bash 前检查是否命中危险命令片段。
 func (ShellSafetyInterceptor) Before(_ context.Context, invocation *Invocation) error {
 	if invocation.ToolName != "bash" {
 		return nil
@@ -60,10 +55,8 @@ func (ShellSafetyInterceptor) Before(_ context.Context, invocation *Invocation) 
 	return nil
 }
 
-// After 是 shell 安全拦截器的后置钩子，当前不做额外处理。
 func (ShellSafetyInterceptor) After(_ context.Context, _ Invocation, _ *Result, _ error) {}
 
-// SafeJoin 将候选路径限制在给定工作区内，并返回安全的绝对路径。
 func SafeJoin(root string, candidate string) (string, error) {
 	rootAbs, err := filepath.Abs(root)
 	if err != nil {
@@ -89,7 +82,6 @@ func SafeJoin(root string, candidate string) (string, error) {
 	return target, nil
 }
 
-// stringArg 从已解析参数中安全读取字符串值。
 func stringArg(arguments map[string]any, key string) (string, bool) {
 	if arguments == nil {
 		return "", false

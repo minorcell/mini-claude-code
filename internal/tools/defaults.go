@@ -1,6 +1,5 @@
 package tools
 
-// DefaultRegistry 返回带默认拦截器和内置工具的注册中心。
 func DefaultRegistry(workspace string) *Registry {
 	registry := NewRegistry(
 		WorkspaceInterceptor{Root: workspace},

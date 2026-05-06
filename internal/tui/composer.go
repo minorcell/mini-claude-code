@@ -6,7 +6,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// renderComposer renders the composer panel with input and file candidates
 func (m model) renderComposer() string {
 	hint := "Enter sends | Ctrl+J newline"
 	if m.busy && m.queuedPrompt != "" {
@@ -43,7 +42,6 @@ func (m model) renderComposer() string {
 	)
 }
 
-// renderQueuedPrompt renders the queued prompt preview
 func (m model) renderQueuedPrompt(width int) string {
 	preview := strings.TrimSpace(m.queuedPrompt)
 	if preview == "" {
@@ -60,7 +58,6 @@ func (m model) renderQueuedPrompt(width int) string {
 		Render(lipgloss.JoinVertical(lipgloss.Left, lines...))
 }
 
-// footerHint returns the appropriate footer hint based on current state
 func (m model) footerHint() string {
 	switch {
 	case m.busy && m.queuedPrompt != "":

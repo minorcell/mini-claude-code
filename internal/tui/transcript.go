@@ -4,7 +4,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// renderTranscriptEntry renders a single transcript entry with role-based styling
 func (m model) renderTranscriptEntry(entry transcriptEntry, width int) string {
 	accent := m.theme.muted
 	switch entry.Role {

@@ -11,7 +11,6 @@ import (
 	"github.com/minorcell/mini-claude-code/internal/provider"
 )
 
-// BashTool 提供工作区内的 shell 命令执行能力。
 type BashTool struct {
 	root            string
 	defaultTimeout  time.Duration
@@ -24,7 +23,6 @@ type bashArgs struct {
 	TimeoutSeconds int    `json:"timeout_seconds,omitempty"`
 }
 
-// NewBashTool 创建一个 bash 工具实例。
 func NewBashTool(root string) *BashTool {
 	return &BashTool{
 		root:            root,
@@ -33,7 +31,6 @@ func NewBashTool(root string) *BashTool {
 	}
 }
 
-// Definition 返回 bash 工具的模型可见定义。
 func (t *BashTool) Definition() provider.ToolDefinition {
 	return provider.ToolDefinition{
 		Name:        "bash",
@@ -59,7 +56,6 @@ func (t *BashTool) Definition() provider.ToolDefinition {
 	}
 }
 
-// Execute 执行一次 bash 工具调用。
 func (t *BashTool) Execute(ctx context.Context, invocation Invocation) (Result, error) {
 	var args bashArgs
 	if err := json.Unmarshal(invocation.Arguments, &args); err != nil {
@@ -124,7 +120,6 @@ func (t *BashTool) Execute(ctx context.Context, invocation Invocation) (Result, 
 	}, nil
 }
 
-// trimOutput 按给定上限截断命令输出，并返回是否发生截断。
 func trimOutput(data []byte, limit int) (string, bool) {
 	if len(data) <= limit {
 		return string(data), false

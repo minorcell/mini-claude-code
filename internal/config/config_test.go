@@ -6,7 +6,6 @@ import (
 	"testing"
 )
 
-// TestLoadUsesProviderEnvAPIKey 验证 env_api_key 能正确解析真实 API Key。
 func TestLoadUsesProviderEnvAPIKey(t *testing.T) {
 	t.Setenv("MY_GATEWAY_KEY", "secret-value")
 
@@ -21,7 +20,6 @@ func TestLoadUsesProviderEnvAPIKey(t *testing.T) {
 	}
 }
 
-// TestNormalizeProviderTypeAliases 验证 provider.type 的别名会被统一折叠。
 func TestNormalizeProviderTypeAliases(t *testing.T) {
 	cfg := Default()
 	cfg.Provider.Type = "openai_compatible"
@@ -32,7 +30,6 @@ func TestNormalizeProviderTypeAliases(t *testing.T) {
 	}
 }
 
-// TestEffectiveWorkspaceExpandsHome 验证工作区路径支持波浪号展开。
 func TestEffectiveWorkspaceExpandsHome(t *testing.T) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -53,7 +50,6 @@ func TestEffectiveWorkspaceExpandsHome(t *testing.T) {
 	}
 }
 
-// TestLoadProviderStructFromYAML 验证新的 provider 结构可以从 YAML 正常加载。
 func TestLoadProviderStructFromYAML(t *testing.T) {
 	configPath := filepath.Join(t.TempDir(), "config.yaml")
 	data := []byte(`
@@ -94,7 +90,6 @@ provider:
 	}
 }
 
-// TestNormalizeMaxStepsFallsBackToDefault 验证非法 max_steps 会回退到默认值。
 func TestNormalizeMaxStepsFallsBackToDefault(t *testing.T) {
 	cfg := Default()
 	cfg.MaxSteps = 0

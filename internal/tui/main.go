@@ -6,7 +6,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// renderMain renders the main layout with conversation and trace panels
 func (m model) renderMain() string {
 	columnGap := m.theme.canvasFill().Render(" ")
 	rowGap := m.theme.canvasFill().Width(m.layout.totalWidth).Render("")
@@ -36,7 +35,6 @@ func (m model) renderMain() string {
 	return lipgloss.JoinHorizontal(lipgloss.Top, conversation, columnGap, trace)
 }
 
-// renderFooter renders the footer with help text and error messages
 func (m model) renderFooter() string {
 	space := m.theme.canvasFill().Render(" ")
 	helpLine := lipgloss.JoinHorizontal(
@@ -56,7 +54,6 @@ func (m model) renderFooter() string {
 		Render(body)
 }
 
-// renderPanel renders a generic panel with title, hint, and body
 func (m model) renderPanel(title string, hint string, body string, width int, height int, focused bool, accent string) string {
 	innerWidth := max(1, width-m.theme.panelBase.GetHorizontalFrameSize())
 	innerHeight := max(0, height-m.panelBorderHeight())
@@ -80,12 +77,10 @@ func (m model) renderPanel(title string, hint string, body string, width int, he
 		Render(content)
 }
 
-// panelBorderWidth returns the horizontal border width of panels
 func (m model) panelBorderWidth() int {
 	return m.theme.panelBase.GetHorizontalBorderSize() + m.theme.panelBase.GetHorizontalMargins()
 }
 
-// panelBorderHeight returns the vertical border height of panels
 func (m model) panelBorderHeight() int {
 	return m.theme.panelBase.GetVerticalBorderSize() + m.theme.panelBase.GetVerticalMargins()
 }
