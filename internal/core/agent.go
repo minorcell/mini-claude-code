@@ -116,7 +116,7 @@ func (a *Agent) runTurn(ctx context.Context, session *Session, userInput string,
 
 		response, err := a.client.Complete(ctx, provider.Request{
 			Model:       a.config.Model,
-			Messages:    cloneMessages(session.Messages),
+			Messages:    session.Messages,
 			Tools:       a.registry.Definitions(),
 			MaxTokens:   a.config.MaxTokens,
 			Temperature: a.config.Temperature,
@@ -200,12 +200,6 @@ func (a *Agent) runTurn(ctx context.Context, session *Session, userInput string,
 	}
 
 	return result, fmt.Errorf("agent exceeded max steps (%d)", a.config.MaxSteps)
-}
-
-func cloneMessages(messages []provider.Message) []provider.Message {
-	cloned := make([]provider.Message, len(messages))
-	copy(cloned, messages)
-	return cloned
 }
 
 func stringifyArguments(arguments json.RawMessage) string {

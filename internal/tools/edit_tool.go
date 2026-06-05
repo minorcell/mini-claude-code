@@ -106,16 +106,11 @@ func (t *EditTool) edit(target, oldContent, newContent string, all bool) (Result
 		return Result{}, fmt.Errorf("write file %q: %w", target, err)
 	}
 
-	replacedCount := count
-	if !all {
-		replacedCount = 1
-	}
-
 	return Result{
-		Output: fmt.Sprintf("replaced %d occurrence(s) in %s", replacedCount, target),
+		Output: fmt.Sprintf("replaced %d occurrence(s) in %s", count, target),
 		Metadata: map[string]any{
 			"path":           target,
-			"replaced_count": replacedCount,
+			"replaced_count": count,
 			"total_found":    count,
 			"all":            all,
 		},

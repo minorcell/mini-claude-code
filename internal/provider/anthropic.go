@@ -73,7 +73,7 @@ func (c *AnthropicClient) Complete(ctx context.Context, req Request) (Response, 
 	}
 
 	var textParts []string
-	toolCalls := make([]ToolCall, 0)
+	var toolCalls []ToolCall
 	for _, block := range response.Content {
 		switch block.Type {
 		case "text":
@@ -124,7 +124,7 @@ type anthropicResponse struct {
 }
 
 func toAnthropicMessages(messages []Message) (string, []map[string]any, error) {
-	systemParts := make([]string, 0)
+	var systemParts []string
 	converted := make([]map[string]any, 0, len(messages))
 
 	for _, message := range messages {

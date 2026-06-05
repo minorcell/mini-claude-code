@@ -83,8 +83,8 @@ func (c *GeminiClient) Complete(ctx context.Context, req Request) (Response, err
 	}
 
 	parts := response.Candidates[0].Content.Parts
-	textParts := make([]string, 0)
-	toolCalls := make([]ToolCall, 0)
+	var textParts []string
+	var toolCalls []ToolCall
 	for index, part := range parts {
 		if part.Text != "" {
 			textParts = append(textParts, part.Text)
@@ -140,7 +140,7 @@ type geminiResponse struct {
 }
 
 func toGeminiMessages(messages []Message) (string, []map[string]any, error) {
-	systemParts := make([]string, 0)
+	var systemParts []string
 	converted := make([]map[string]any, 0, len(messages))
 
 	for _, message := range messages {
