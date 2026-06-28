@@ -1,4 +1,4 @@
-# mini-opencode 架构设计文档
+# mini-claude-code 架构设计文档
 
 ## 1. 模块划分
 
@@ -29,7 +29,7 @@ config.Load
 
 ### 2.1 职责
 
-- 加载 `~/.mini-opencode/config.yaml`
+- 加载 `~/.mini-claude-code/config.yaml`
 - 在配置不存在时自动写入默认文件
 - 规范化 `provider.type`
 - 解析工作区与环境变量
@@ -364,7 +364,7 @@ type model struct {
 
 ## 7. cmd 模块
 
-`cmd/mini-opencode/main.go` 负责唯一的组装入口：
+`cmd/mini-claude-code/main.go` 负责唯一的组装入口：
 
 1. `config.DefaultPath()`
 2. `config.Load()`

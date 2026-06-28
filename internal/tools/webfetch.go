@@ -72,7 +72,7 @@ func (t *WebFetchTool) Execute(ctx context.Context, invocation Invocation) (Resu
 	if err != nil {
 		return Result{}, fmt.Errorf("create request: %w", err)
 	}
-	req.Header.Set("User-Agent", "mini-opencode/0.1")
+	req.Header.Set("User-Agent", "mini-claude-code/0.1")
 
 	resp, err := t.client.Do(req)
 	if err != nil {

@@ -136,7 +136,7 @@ func newModel(app App) model {
 	keys := newKeyMap()
 
 	input := textarea.New()
-	input.Placeholder = "Ask mini-opencode to inspect, edit, or debug..."
+	input.Placeholder = "Ask mini-claude-code to inspect, edit, or debug..."
 	input.Prompt = ">> "
 	input.ShowLineNumbers = false
 	input.CharLimit = 4096

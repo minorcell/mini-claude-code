@@ -60,7 +60,7 @@ func DefaultPath() (string, error) {
 		return "", fmt.Errorf("resolve home directory: %w", err)
 	}
 
-	return filepath.Join(home, ".mini-opencode", "config.yaml"), nil
+	return filepath.Join(home, ".mini-claude-code", "config.yaml"), nil
 }
 
 func Load(path string) (Config, error) {

@@ -8,11 +8,11 @@
 >
 > 交互式教学：[CellStack - 从0构建一个 Mini Claude Code](https://stack.mcell.top/topics/build-mini-claude-code)
 
-`mini-opencode` 是一个 Code Agent 项目。它基于 Go + Bubble Tea，提供终端内的代码读取、工具调用、shell 执行与 todo 管理能力，并将过程保留在同一个 TUI 会话里。
+`mini-claude-code` 是一个 Code Agent 项目。它基于 Go + Bubble Tea，提供终端内的代码读取、工具调用、shell 执行与 todo 管理能力，并将过程保留在同一个 TUI 会话里。
 
 ## 仓库结构
 
-- `cmd/mini-opencode`：程序入口
+- `cmd/mini-claude-code`：程序入口
 - `internal/config`：配置加载与默认值
 - `internal/core`：agent loop、session、逐步事件广播
 - `internal/provider`：统一模型接口，适配 `openai` / `openai-compatible` / `anthropic` / `gemini`
@@ -32,10 +32,10 @@
 ## 快速开始
 
 ```bash
-go run ./cmd/mini-opencode
+go run ./cmd/mini-claude-code
 ```
 
-首次启动会自动生成 `~/.mini-opencode/config.yaml`。
+首次启动会自动生成 `~/.mini-claude-code/config.yaml`。
 
 如果使用默认 OpenAI 配置，先设置：
 
@@ -54,7 +54,7 @@ go test ./...
 默认配置文件路径：
 
 ```txt
-~/.mini-opencode/config.yaml
+~/.mini-claude-code/config.yaml
 ```
 
 最小示例：

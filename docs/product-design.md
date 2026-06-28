@@ -1,8 +1,8 @@
-# mini-opencode 产品设计文档
+# mini-claude-code 产品设计文档
 
 ## 1. 产品概述
 
-mini-opencode 是一个运行在终端里的 Code Agent。用户用自然语言发出任务，模型在同一工作区内读文件、改文件、执行命令、维护 todo，并把每一步产物写回会话上下文。
+mini-claude-code 是一个运行在终端里的 Code Agent。用户用自然语言发出任务，模型在同一工作区内读文件、改文件、执行命令、维护 todo，并把每一步产物写回会话上下文。
 
 当前实现强调三点：
 
@@ -37,7 +37,7 @@ mini-opencode 是一个运行在终端里的 Code Agent。用户用自然语言�
 
 ### 3.2 工作区文件工具
 
-mini-opencode 当前内置的文件相关工具如下：
+mini-claude-code 当前内置的文件相关工具如下：
 
 | 工具 | 能力 | 说明 |
 | --- | --- | --- |
@@ -77,7 +77,7 @@ mini-opencode 当前内置的文件相关工具如下：
 - 只允许 `http` / `https`
 - HTML 会被做最小清洗，剥离脚本、样式和标签
 - 内容上限 64KB
-- User-Agent 为 `mini-opencode/0.1`
+- User-Agent 为 `mini-claude-code/0.1`
 
 ### 3.6 多 Provider 支持
 
@@ -120,7 +120,7 @@ mini-opencode 当前内置的文件相关工具如下：
 默认配置文件路径：
 
 ```txt
-~/.mini-opencode/config.yaml
+~/.mini-claude-code/config.yaml
 ```
 
 首次启动时，如果文件不存在，会自动创建目录并写入默认配置。
